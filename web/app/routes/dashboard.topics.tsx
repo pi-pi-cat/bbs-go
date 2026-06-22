@@ -53,6 +53,13 @@ type TopicRecord = AdminRecord & {
   type?: number
   status?: number
   qaStatus?: string
+  issueStatus?: string
+  issueSource?: string
+  issuePriority?: string
+  issueSeverity?: string
+  issueOwner?: string
+  platformArea?: string
+  businessScene?: string
   recommend?: boolean
   createTime?: number
   viewCount?: number
@@ -113,6 +120,14 @@ function topicStatusLabel(t: ReturnType<typeof useI18n>["t"], status?: number) {
   return t("dashboard.topicFeed.statusNormal")
 }
 
+function issueStatusLabel(t: ReturnType<typeof useI18n>["t"], status?: string) {
+  if (status === "processing") return t("dashboard.issueStatus.processing")
+  if (status === "resolved") return t("dashboard.issueStatus.resolved")
+  if (status === "closed") return t("dashboard.issueStatus.closed")
+  if (status === "archived") return t("dashboard.issueStatus.archived")
+  return t("dashboard.issueStatus.open")
+}
+
 function topicActionSuccessMessage(
   t: ReturnType<typeof useI18n>["t"],
   action: TopicAction
@@ -129,6 +144,14 @@ function topicActionSuccessMessage(
 
   return t(messageKeys[action])
 }
+
+const issueStatusOptions = [
+  "open",
+  "processing",
+  "resolved",
+  "closed",
+  "archived",
+] as const
 
 function compactText(value: unknown) {
   if (typeof value !== "string") return ""
@@ -153,7 +176,7 @@ export default function DashboardTopicsRoute() {
   const { t } = useI18n()
   const currentUser = useCurrentUser()
   const [filters, setFilters] = React.useState<Record<string, AdminFormValue>>(
-    () => createAdminInitialFilters({ status: 0 }, 20)
+    () => createAdminInitialFilters({ status: 0, type: 2 }, 20)
   )
   const [records, setRecords] = React.useState<TopicRecord[]>([])
   const [total, setTotal] = React.useState(0)
@@ -261,6 +284,25 @@ export default function DashboardTopicsRoute() {
     }
   }
 
+  async function updateIssueStatus(topic: TopicRecord, issueStatus: string) {
+    const id = topic.id
+    if (!id || !canSolve || !issueStatus) return
+
+    setError(null)
+    try {
+      await adminPostForm("/api/admin/topic/update_issue_status", {
+        id,
+        issueStatus,
+      })
+      msgSuccess(t("dashboard.messages.issueStatusUpdated"))
+      await load()
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("dashboard.errors.actionFailed")
+      )
+    }
+  }
+
   if (!canView) {
     return <ErrorPage statusCode={403} />
   }
@@ -322,6 +364,41 @@ export default function DashboardTopicsRoute() {
             ]}
             onChange={(value) => updateFilter("qaStatus", value)}
           />
+          <FilterSelect
+            label={t("dashboard.fields.issueStatus")}
+            value={filters.issueStatus}
+            options={[
+              { label: t("dashboard.issueStatus.open"), value: "open" },
+              {
+                label: t("dashboard.issueStatus.processing"),
+                value: "processing",
+              },
+              { label: t("dashboard.issueStatus.resolved"), value: "resolved" },
+              { label: t("dashboard.issueStatus.closed"), value: "closed" },
+              { label: t("dashboard.issueStatus.archived"), value: "archived" },
+            ]}
+            onChange={(value) => updateFilter("issueStatus", value)}
+          />
+          <FilterInput
+            label={t("dashboard.fields.platformArea")}
+            value={filters.platformArea}
+            onChange={(value) => updateFilter("platformArea", value)}
+          />
+          <FilterInput
+            label={t("dashboard.fields.businessScene")}
+            value={filters.businessScene}
+            onChange={(value) => updateFilter("businessScene", value)}
+          />
+          <FilterInput
+            label={t("dashboard.fields.issueSource")}
+            value={filters.issueSource}
+            onChange={(value) => updateFilter("issueSource", value)}
+          />
+          <FilterInput
+            label={t("dashboard.fields.issueOwner")}
+            value={filters.issueOwner}
+            onChange={(value) => updateFilter("issueOwner", value)}
+          />
           <Button onClick={() => void load()} disabled={loading}>
             <SearchIcon />
             {t("dashboard.actions.search")}
@@ -365,6 +442,9 @@ export default function DashboardTopicsRoute() {
                   solve: canSolve,
                 }}
                 onAction={(action) => runAction(topic, action)}
+                onIssueStatusChange={(issueStatus) =>
+                  void updateIssueStatus(topic, issueStatus)
+                }
               />
             ))
           ) : (
@@ -404,6 +484,7 @@ function TopicFeedItem({
   topic,
   permissions,
   onAction,
+  onIssueStatusChange,
 }: {
   topic: TopicRecord
   permissions: {
@@ -413,6 +494,7 @@ function TopicFeedItem({
     solve: boolean
   }
   onAction: (action: TopicAction) => void
+  onIssueStatusChange: (issueStatus: string) => void
 }) {
   const { t } = useI18n()
   const body = compactText(topic.type === 1 ? topic.content : topic.summary)
@@ -435,6 +517,7 @@ function TopicFeedItem({
     (total, option) => total + (option.voteCount || 0),
     0
   )
+  const currentIssueStatus = topic.issueStatus || "open"
 
   return (
     <article className="grid gap-3 p-4">
@@ -506,6 +589,11 @@ function TopicFeedItem({
               {topic.qaStatus === "solved"
                 ? t("dashboard.topicFeed.qaSolved")
                 : t("dashboard.topicFeed.qaUnsolved")}
+            </TopicTag>
+          ) : null}
+          {topic.type === 2 ? (
+            <TopicTag className="border-sky-400/40 text-sky-700">
+              {issueStatusLabel(t, topic.issueStatus)}
             </TopicTag>
           ) : null}
         </div>
@@ -595,6 +683,24 @@ function TopicFeedItem({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           {topic.category?.name ? <span>{topic.category.name}</span> : null}
+          {topic.platformArea ? (
+            <span>{`${t("dashboard.fields.platformArea")}: ${topic.platformArea}`}</span>
+          ) : null}
+          {topic.businessScene ? (
+            <span>{`${t("dashboard.fields.businessScene")}: ${topic.businessScene}`}</span>
+          ) : null}
+          {topic.issueSource ? (
+            <span>{`${t("dashboard.fields.issueSource")}: ${topic.issueSource}`}</span>
+          ) : null}
+          {topic.issueOwner ? (
+            <span>{`${t("dashboard.fields.issueOwner")}: ${topic.issueOwner}`}</span>
+          ) : null}
+          {topic.issuePriority ? (
+            <span>{`${t("dashboard.fields.issuePriority")}: ${topic.issuePriority}`}</span>
+          ) : null}
+          {topic.issueSeverity ? (
+            <span>{`${t("dashboard.fields.issueSeverity")}: ${topic.issueSeverity}`}</span>
+          ) : null}
           {topic.tags?.map((tag) =>
             tag.name ? <span key={tag.id || tag.name}>#{tag.name}</span> : null
           )}
@@ -613,6 +719,24 @@ function TopicFeedItem({
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
+          {permissions.solve && topic.status === 0 && topic.type === 2 ? (
+            <DashboardSelect
+              value={currentIssueStatus}
+              options={issueStatusOptions.map((status) => ({
+                label: issueStatusLabel(t, status),
+                value: status,
+              }))}
+              allowClear={false}
+              placeholder={t("dashboard.fields.issueStatus")}
+              triggerClassName="h-9 w-36 text-sm"
+              contentClassName="w-40"
+              onValueChange={(value) => {
+                if (value && value !== currentIssueStatus) {
+                  onIssueStatusChange(value)
+                }
+              }}
+            />
+          ) : null}
           <Button size="sm" variant="outline" asChild>
             <a href={topicUrl} target="_blank" rel="noreferrer">
               <ExternalLinkIcon />

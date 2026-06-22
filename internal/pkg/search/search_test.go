@@ -82,34 +82,7 @@ func TestSearchArticleFindsArticleFields(t *testing.T) {
 	}
 }
 
-func TestSearchUserFindsUserFields(t *testing.T) {
-	setupTestIndex(t)
-
-	mustIndex(t, searchDocID(EntityTypeUser, 21), &UserDocument{
-		Type:        EntityTypeUser,
-		Id:          21,
-		Username:    "linus",
-		Nickname:    "Linus",
-		Description: "Kernel maintainer",
-		Status:      0,
-		TopicCount:  8,
-		FansCount:   99,
-		CreateTime:  1000,
-	})
-
-	docs, _, err := SearchUser("Kernel", 1, 20)
-	if err != nil {
-		t.Fatalf("SearchUser returned error: %v", err)
-	}
-	if len(docs) != 1 {
-		t.Fatalf("expected one user result, got %d", len(docs))
-	}
-	if docs[0].Id != 21 {
-		t.Fatalf("expected user id 21, got %d", docs[0].Id)
-	}
-}
-
-func TestSearchAllReturnsGroupedPreview(t *testing.T) {
+func TestSearchAllReturnsOnlyTopicAndArticlePreview(t *testing.T) {
 	setupTestIndex(t)
 
 	mustIndex(t, searchDocID(EntityTypeTopic, 1), &TopicDocument{
@@ -127,20 +100,13 @@ func TestSearchAllReturnsGroupedPreview(t *testing.T) {
 		Content:    "Article content.",
 		CreateTime: 1000,
 	})
-	mustIndex(t, searchDocID(EntityTypeUser, 3), &UserDocument{
-		Type:        EntityTypeUser,
-		Id:          3,
-		Nickname:    "Unified User",
-		Description: "Searchable user.",
-		CreateTime:  1000,
-	})
 
 	result, err := SearchAll("Unified", 5)
 	if err != nil {
 		t.Fatalf("SearchAll returned error: %v", err)
 	}
-	if len(result.Topics) != 1 || len(result.Articles) != 1 || len(result.Users) != 1 {
-		t.Fatalf("expected grouped topic/article/user preview, got topics=%d articles=%d users=%d", len(result.Topics), len(result.Articles), len(result.Users))
+	if len(result.Topics) != 1 || len(result.Articles) != 1 {
+		t.Fatalf("expected grouped topic/article preview, got topics=%d articles=%d", len(result.Topics), len(result.Articles))
 	}
 }
 

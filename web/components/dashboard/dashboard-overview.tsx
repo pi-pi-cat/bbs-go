@@ -7,13 +7,10 @@ import {
   CheckCircle2Icon,
   ClockIcon,
   FileTextIcon,
-  GaugeIcon,
   MailWarningIcon,
   MessageSquareIcon,
   SettingsIcon,
-  ShieldCheckIcon,
   TagsIcon,
-  UsersIcon,
 } from "lucide-react"
 
 import { useCurrentUser } from "@/components/app/app-provider"
@@ -31,12 +28,19 @@ type OverviewMetricKey =
   | "totalArticles"
   | "todayUsers"
   | "todayTopics"
+  | "totalIssues"
+  | "totalKnowledge"
+  | "todayIssues"
+  | "resolvedIssues"
+  | "processingIssues"
 
 type PendingKey =
   | "pendingTopics"
   | "pendingArticles"
   | "pendingReports"
   | "failedEmails"
+  | "openIssues"
+  | "processingIssues"
 
 type RecentItem = {
   id?: number | string
@@ -110,12 +114,19 @@ function normalizeOverview(data: AdminRecord | null): OverviewData | null {
       totalArticles: toNumber(metrics.totalArticles),
       todayUsers: toNumber(metrics.todayUsers),
       todayTopics: toNumber(metrics.todayTopics),
+      totalIssues: toNumber(metrics.totalIssues),
+      totalKnowledge: toNumber(metrics.totalKnowledge),
+      todayIssues: toNumber(metrics.todayIssues),
+      resolvedIssues: toNumber(metrics.resolvedIssues),
+      processingIssues: toNumber(metrics.processingIssues),
     },
     pending: {
       pendingTopics: toNumber(pending.pendingTopics),
       pendingArticles: toNumber(pending.pendingArticles),
       pendingReports: toNumber(pending.pendingReports),
       failedEmails: toNumber(pending.failedEmails),
+      openIssues: toNumber(pending.openIssues),
+      processingIssues: toNumber(pending.processingIssues),
     },
     recent: {
       topics: toRecentItems(recent.topics),
@@ -158,11 +169,11 @@ export function DashboardOverview() {
     key: OverviewMetricKey
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   }> = [
-    { key: "totalUsers", icon: UsersIcon },
-    { key: "totalTopics", icon: MessageSquareIcon },
-    { key: "totalArticles", icon: FileTextIcon },
-    { key: "todayUsers", icon: UsersIcon },
-    { key: "todayTopics", icon: GaugeIcon },
+    { key: "totalIssues", icon: MessageSquareIcon },
+    { key: "totalKnowledge", icon: FileTextIcon },
+    { key: "resolvedIssues", icon: CheckCircle2Icon },
+    { key: "todayIssues", icon: ClockIcon },
+    { key: "processingIssues", icon: AlertCircleIcon },
   ]
 
   const pendingItems: Array<{
@@ -172,9 +183,15 @@ export function DashboardOverview() {
     permission: PermissionCode
   }> = [
     {
-      key: "pendingTopics",
+      key: "openIssues",
       href: "/dashboard/topics",
       icon: MessageSquareIcon,
+      permission: PERMISSIONS.DASHBOARD_TOPIC_VIEW,
+    },
+    {
+      key: "processingIssues",
+      href: "/dashboard/topics",
+      icon: AlertCircleIcon,
       permission: PERMISSIONS.DASHBOARD_TOPIC_VIEW,
     },
     {
@@ -210,10 +227,10 @@ export function DashboardOverview() {
       permission: PERMISSIONS.DASHBOARD_TOPIC_VIEW,
     },
     {
-      key: "users",
-      href: "/dashboard/users",
-      icon: UsersIcon,
-      permission: PERMISSIONS.DASHBOARD_USER_VIEW,
+      key: "articles",
+      href: "/dashboard/articles",
+      icon: FileTextIcon,
+      permission: PERMISSIONS.DASHBOARD_ARTICLE_VIEW,
     },
     {
       key: "categories",
@@ -227,26 +244,13 @@ export function DashboardOverview() {
       icon: SettingsIcon,
       permission: PERMISSIONS.DASHBOARD_SETTING_VIEW,
     },
-    {
-      key: "tasks",
-      href: "/dashboard/tasks",
-      icon: ShieldCheckIcon,
-      permission: PERMISSIONS.DASHBOARD_TASK_VIEW,
-    },
-    {
-      key: "levels",
-      href: "/dashboard/levels",
-      icon: GaugeIcon,
-      permission: PERMISSIONS.DASHBOARD_LEVEL_VIEW,
-    },
   ]
 
   const recentSections: Array<{
-    key: "topics" | "users"
+    key: "topics"
     href: string
   }> = [
     { key: "topics", href: "/dashboard/topics" },
-    { key: "users", href: "/dashboard/users" },
   ]
   const visiblePendingItems = pendingItems
     .filter((item) => canUse(item.permission))

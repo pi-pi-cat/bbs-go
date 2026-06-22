@@ -1,6 +1,9 @@
 package services
 
 import (
+	"bbs-go/internal/cache"
+	"bbs-go/internal/models"
+	"bbs-go/internal/models/constants"
 	"encoding/xml"
 	"errors"
 	"strconv"
@@ -33,6 +36,34 @@ func TestBuildSitemapIndexXML_UsesUploadedChildURLs(t *testing.T) {
 		if !strings.Contains(xml, expected) {
 			t.Fatalf("expected sitemap index XML to contain %q, got:\n%s", expected, xml)
 		}
+	}
+}
+
+func TestBuildStaticSitemapFilesDoesNotExposeRemovedLinksPage(t *testing.T) {
+	db := setupTestDB(t)
+	if err := db.AutoMigrate(&models.Category{}, &models.Tag{}, &models.SysConfig{}); err != nil {
+		t.Fatalf("auto migrate sitemap tables: %v", err)
+	}
+	cache.SysConfigCache.Invalidate(constants.SysConfigBaseURL)
+	t.Cleanup(func() { cache.SysConfigCache.Invalidate(constants.SysConfigBaseURL) })
+	if err := db.Create(&models.SysConfig{Key: constants.SysConfigBaseURL, Value: "/"}).Error; err != nil {
+		t.Fatalf("create base URL config: %v", err)
+	}
+
+	files, err := SeoSitemapService.buildStaticSitemapFiles()
+	if err != nil {
+		t.Fatalf("build static sitemap files: %v", err)
+	}
+	if len(files) == 0 {
+		t.Fatal("expected static sitemap files")
+	}
+
+	var combined strings.Builder
+	for _, file := range files {
+		combined.WriteString(file.XML)
+	}
+	if strings.Contains(combined.String(), "/links") {
+		t.Fatalf("static sitemap should not expose removed links page:\n%s", combined.String())
 	}
 }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUp, Heart, MessageCircle, Star } from "lucide-react"
+import { ArrowUp, Heart, MessageCircle } from "lucide-react"
 
 import { useTopicActions } from "@/components/topic/topic-action-context"
 import { cn } from "@/lib/utils"
@@ -9,10 +9,8 @@ export function TopicSideActionBar() {
   const {
     liked,
     likeCount,
-    favorited,
     commentCount,
     toggleLike,
-    toggleFavorite,
     scrollToComment,
     scrollToTop,
   } = useTopicActions()
@@ -44,19 +42,6 @@ export function TopicSideActionBar() {
             <span className="act-num">{commentCount}</span>
           ) : null}
           <MessageCircle className="size-6 text-muted-foreground" />
-        </button>
-        <button
-          type="button"
-          className={cn("action", favorited && "active")}
-          aria-label="favorite"
-          onClick={() => void toggleFavorite("side")}
-        >
-          <Star
-            className={cn(
-              "size-6",
-              favorited ? "fill-white text-white" : "text-muted-foreground"
-            )}
-          />
         </button>
         <button
           type="button"

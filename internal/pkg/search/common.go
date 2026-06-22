@@ -12,7 +12,6 @@ import (
 const (
 	EntityTypeTopic   = "topic"
 	EntityTypeArticle = "article"
-	EntityTypeUser    = "user"
 )
 
 type TopicDocument struct {
@@ -42,28 +41,9 @@ type ArticleDocument struct {
 	CreateTime int64    `json:"createTime"`
 }
 
-type UserDocument struct {
-	Type         string `json:"type"`
-	Id           int64  `json:"id"`
-	Username     string `json:"username"`
-	Nickname     string `json:"nickname"`
-	Avatar       string `json:"avatar"`
-	Description  string `json:"description"`
-	Status       int    `json:"status"`
-	TopicCount   int    `json:"topicCount"`
-	CommentCount int    `json:"commentCount"`
-	FansCount    int    `json:"fansCount"`
-	FollowCount  int    `json:"followCount"`
-	Score        int    `json:"score"`
-	Exp          int    `json:"exp"`
-	Level        int    `json:"level"`
-	CreateTime   int64  `json:"createTime"`
-}
-
 type AllResult struct {
 	Topics   []TopicDocument   `json:"topics"`
 	Articles []ArticleDocument `json:"articles"`
-	Users    []UserDocument    `json:"users"`
 }
 
 func (t *TopicDocument) ToStr() string {
@@ -84,23 +64,13 @@ func newIndex(indexPath string) bleve.Index {
 	mapping.DefaultMapping.AddFieldMappingsAt("id", newNumField())
 	mapping.DefaultMapping.AddFieldMappingsAt("categoryId", newNumField())
 	mapping.DefaultMapping.AddFieldMappingsAt("userId", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("username", newTextField())
 	mapping.DefaultMapping.AddFieldMappingsAt("nickname", newTextField())
-	mapping.DefaultMapping.AddFieldMappingsAt("avatar", newTextField())
 	mapping.DefaultMapping.AddFieldMappingsAt("title", newTextField())
 	mapping.DefaultMapping.AddFieldMappingsAt("summary", newTextField())
 	mapping.DefaultMapping.AddFieldMappingsAt("content", newTextField())
-	mapping.DefaultMapping.AddFieldMappingsAt("description", newTextField())
 	mapping.DefaultMapping.AddFieldMappingsAt("tags", newTextField())
 	mapping.DefaultMapping.AddFieldMappingsAt("recommend", newBoolField())
 	mapping.DefaultMapping.AddFieldMappingsAt("status", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("topicCount", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("commentCount", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("fansCount", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("followCount", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("score", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("exp", newNumField())
-	mapping.DefaultMapping.AddFieldMappingsAt("level", newNumField())
 	mapping.DefaultMapping.AddFieldMappingsAt("createTime", newNumField())
 
 	index, err := bleve.New(indexPath, mapping)

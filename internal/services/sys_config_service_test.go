@@ -17,3 +17,17 @@ func TestParseModulesConfig_RespectsExplicitQaSwitch(t *testing.T) {
 		t.Fatalf("expected explicit qa=false to disable QA independently from topic")
 	}
 }
+
+func TestDefaultNotificationTypeKeysDropRemovedCommunityGrowthEvents(t *testing.T) {
+	keys := defaultNotificationTypeKeys()
+	for _, removed := range []string{"topicFavorite", "userLevelUp", "userBadgeGrant"} {
+		if containsString(keys, removed) {
+			t.Fatalf("expected notification type %q to be removed, got %#v", removed, keys)
+		}
+	}
+	for _, expected := range []string{"topicComment", "commentReply", "topicLike", "topicRecommend", "topicDelete", "articleComment", "qaAnswerAccepted"} {
+		if !containsString(keys, expected) {
+			t.Fatalf("expected notification type %q to remain, got %#v", expected, keys)
+		}
+	}
+}

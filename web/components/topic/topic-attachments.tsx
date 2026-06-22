@@ -36,12 +36,7 @@ export function TopicAttachments({ attachments, t }: { attachments?: Attachment[
                 {typeof attachment.downloadCount === "number" ? (
                   <span>{t("pages.topic.detail.attachmentDownloadCount", { count: attachment.downloadCount })}</span>
                 ) : null}
-                {attachment.downloadScore && !attachment.downloaded ? (
-                  <>
-                    <span>·</span>
-                    <span>{t("pages.topic.detail.attachmentScoreRequired", { score: attachment.downloadScore })}</span>
-                  </>
-                ) : attachment.downloaded ? (
+                {attachment.downloaded ? (
                   <>
                     <span>·</span>
                     <span>{t("pages.topic.detail.attachmentPurchased")}</span>

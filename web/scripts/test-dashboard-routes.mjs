@@ -26,40 +26,17 @@ const dedicatedRoutes = {
     expectedDefaultExport: "DashboardArticlesRoute",
     forbiddenImport: "admin-article-feed-page",
   },
-  "dashboard.levels.tsx": {
-    removedComponent: "admin-levels-page.tsx",
-    expectedDefaultExport: "DashboardLevelsRoute",
-    forbiddenImport: "admin-levels-page",
-  },
   "dashboard.user-reports.tsx": {
     expectedDefaultExport: "DashboardUserReportsRoute",
   },
   "dashboard.categories.tsx": {
     expectedDefaultExport: "DashboardCategoriesRoute",
   },
-  "dashboard.links.tsx": {
-    expectedDefaultExport: "DashboardLinksRoute",
-  },
   "dashboard.forbidden-words.tsx": {
     expectedDefaultExport: "DashboardForbiddenWordsRoute",
   },
-  "dashboard.badges.tsx": {
-    expectedDefaultExport: "DashboardBadgesRoute",
-  },
-  "dashboard.tasks.tsx": {
-    expectedDefaultExport: "DashboardTasksRoute",
-  },
   "dashboard.roles.tsx": {
     expectedDefaultExport: "DashboardRolesRoute",
-  },
-  "dashboard.user-badges.tsx": {
-    expectedDefaultExport: "DashboardUserBadgesRoute",
-  },
-  "dashboard.user-exp-logs.tsx": {
-    expectedDefaultExport: "DashboardUserExpLogsRoute",
-  },
-  "dashboard.user-task-logs.tsx": {
-    expectedDefaultExport: "DashboardUserTaskLogsRoute",
   },
   "dashboard.email-logs.tsx": {
     expectedDefaultExport: "DashboardEmailLogsRoute",
@@ -112,6 +89,22 @@ assert.equal(
   false,
   "dashboard.comments.tsx should be removed because comments are not managed in dashboard"
 )
+
+for (const removedRoute of [
+  "dashboard.badges.tsx",
+  "dashboard.levels.tsx",
+  "dashboard.links.tsx",
+  "dashboard.tasks.tsx",
+  "dashboard.user-badges.tsx",
+  "dashboard.user-exp-logs.tsx",
+  "dashboard.user-task-logs.tsx",
+]) {
+  assert.equal(
+    existsSync(resolve(routesDir, removedRoute)),
+    false,
+    `${removedRoute} should be removed from the simplified dashboard`
+  )
+}
 
 assert.equal(
   existsSync(resolve(dashboardDataDir, "dashboard-data-page-configs.tsx")),

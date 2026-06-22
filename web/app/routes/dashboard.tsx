@@ -67,7 +67,6 @@ function dashboardBreadcrumbs(
           url: "/dashboard/articles",
         },
         categories: { title: t("dashboard.nav.categories"), url: "/dashboard/categories" },
-        links: { title: t("dashboard.nav.links"), url: "/dashboard/links" },
         "forbidden-words": {
           title: t("dashboard.nav.forbiddenWords"),
           url: "/dashboard/forbidden-words",
@@ -79,27 +78,10 @@ function dashboardBreadcrumbs(
       url: "/dashboard/users",
       items: {
         users: { title: t("dashboard.nav.userList"), url: "/dashboard/users" },
-        "user-badges": {
-          title: t("dashboard.nav.userBadges"),
-          url: "/dashboard/user-badges",
+        "user-reports": {
+          title: t("dashboard.nav.userReports"),
+          url: "/dashboard/user-reports",
         },
-        "user-exp-logs": {
-          title: t("dashboard.nav.userExpLogs"),
-          url: "/dashboard/user-exp-logs",
-        },
-        "user-task-logs": {
-          title: t("dashboard.nav.userTaskLogs"),
-          url: "/dashboard/user-task-logs",
-        },
-      },
-    },
-    {
-      title: t("dashboard.nav.growth"),
-      url: "/dashboard/badges",
-      items: {
-        badges: { title: t("dashboard.nav.badges"), url: "/dashboard/badges" },
-        levels: { title: t("dashboard.nav.levels"), url: "/dashboard/levels" },
-        tasks: { title: t("dashboard.nav.tasks"), url: "/dashboard/tasks" },
       },
     },
     {

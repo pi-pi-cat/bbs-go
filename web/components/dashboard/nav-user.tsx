@@ -4,7 +4,6 @@ import * as React from "react"
 import { Link } from "react-router-dom"
 import {
   BadgeCheckIcon,
-  BellIcon,
   ChevronsUpDownIcon,
   LogOutIcon,
 } from "lucide-react"
@@ -117,12 +116,6 @@ export function NavUser({
                   <Link to="/user/profile">
                     <BadgeCheckIcon />
                     {t("dashboard.user.account")}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/user/messages">
-                    <BellIcon />
-                    {t("dashboard.user.notifications")}
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

@@ -3,15 +3,12 @@ package api
 import (
 	"bbs-go/internal/models/constants"
 	"bbs-go/internal/models/req"
-	"bbs-go/internal/models/resp"
 	"bbs-go/internal/pkg/common"
 	"bbs-go/internal/pkg/config"
 	"bbs-go/internal/pkg/errs"
 	"bbs-go/internal/pkg/idcodec"
 	"bbs-go/internal/pkg/locales"
-	"bbs-go/internal/pkg/msg"
 	"bbs-go/internal/pkg/validate"
-	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -21,12 +18,9 @@ import (
 	"bbs-go/internal/pkg/params"
 
 	"github.com/mlogclub/simple/common/strs"
-	"github.com/mlogclub/simple/sqls"
-	"github.com/spf13/cast"
 
 	"bbs-go/internal/cache"
 	"bbs-go/internal/handlers/render"
-	"bbs-go/internal/models"
 	"bbs-go/internal/services"
 )
 
@@ -221,122 +215,6 @@ func UserSetBackgroundImage(ctx *gin.Context) {
 		return
 	}
 	ginx.WriteJSON(ctx, nil)
-
-}
-
-func UserFavorites(ctx *gin.Context) {
-	user := common.GetCurrentUser(ctx)
-	cursor := params.FormValueInt64Default(ctx, "cursor", 0)
-
-	// 用户必须登录
-	if user == nil {
-		ginx.WriteJSON(ctx, errs.NotLogin())
-		return
-	}
-
-	// 查询列表
-	limit := 20
-	var favorites []models.Favorite
-	if cursor > 0 {
-		favorites = services.FavoriteService.Find(sqls.NewCnd().Where("user_id = ? and id < ?",
-			user.Id, cursor).Desc("id").Limit(20))
-	} else {
-		favorites = services.FavoriteService.Find(sqls.NewCnd().Where("user_id = ?", user.Id).Desc("id").Limit(limit))
-	}
-
-	hasMore := false
-	if len(favorites) > 0 {
-		cursor = favorites[len(favorites)-1].Id
-		hasMore = len(favorites) >= limit
-	}
-
-	ginx.WriteJSON(ctx, ginx.CursorData(render.BuildFavorites(favorites), strconv.FormatInt(cursor, 10), hasMore))
-
-}
-
-func UserMsgRecent(ctx *gin.Context) {
-	user := common.GetCurrentUser(ctx)
-	var count int64 = 0
-	var messages []models.Message
-	if user != nil {
-		count = services.MessageService.GetUnReadCount(user.Id)
-		messages = services.MessageService.Find(sqls.NewCnd().Eq("user_id", user.Id).
-			Eq("status", msg.StatusUnread).Limit(3).Desc("id"))
-	}
-	ginx.WriteJSON(ctx, map[string]any{"count": count, "messages": render.BuildMessages(messages)})
-
-}
-
-func UserMessages(ctx *gin.Context) {
-	user, err := common.CheckLogin(ctx)
-	if err != nil {
-		ginx.WriteJSON(ctx, errs.NotLogin())
-		return
-	}
-	var (
-		limit     = 20
-		cursor, _ = params.GetInt64(ctx, "cursor")
-	)
-
-	cnd := sqls.NewCnd().Eq("user_id", user.Id).Limit(limit).Desc("id")
-	if cursor > 0 {
-		cnd.Lt("id", cursor)
-	}
-	list := services.MessageService.Find(cnd)
-
-	var (
-		nextCursor = cursor
-		hasMore    = false
-	)
-	if len(list) > 0 {
-		nextCursor = list[len(list)-1].Id
-		hasMore = len(list) == limit
-	}
-
-	// 全部标记为已读
-	services.MessageService.MarkRead(user.Id)
-
-	ginx.WriteJSON(ctx, ginx.CursorData(render.BuildMessages(list), cast.ToString(nextCursor), hasMore))
-
-}
-
-func UserScoreLogs(ctx *gin.Context) {
-	user, err := common.CheckLogin(ctx)
-	if err != nil {
-		ginx.WriteJSON(ctx, err)
-		return
-	}
-	var (
-		limit     = 20
-		cursor, _ = params.GetInt64(ctx, "cursor")
-	)
-	cnd := sqls.NewCnd().Eq("user_id", user.Id).Limit(limit).Desc("id")
-	if cursor > 0 {
-		cnd.Lt("id", cursor)
-	}
-	list := services.UserScoreLogService.Find(cnd)
-
-	var (
-		nextCursor = cursor
-		hasMore    = false
-	)
-	if len(list) > 0 {
-		nextCursor = list[len(list)-1].Id
-		hasMore = len(list) == limit
-	}
-
-	ginx.WriteJSON(ctx, ginx.CursorData(list, cast.ToString(nextCursor), hasMore))
-
-}
-
-func UserScoreRank(ctx *gin.Context) {
-
-	users := cache.UserCache.GetScoreRank()
-	var results []*resp.UserInfo
-	for _, user := range users {
-		results = append(results, render.BuildUserInfo(&user))
-	}
-	ginx.WriteJSON(ctx, results)
 
 }
 

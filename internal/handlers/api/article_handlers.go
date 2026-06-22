@@ -6,7 +6,6 @@ import (
 	"bbs-go/internal/permissions"
 	"bbs-go/internal/pkg/bbsurls"
 	"bbs-go/internal/pkg/common"
-	"bbs-go/internal/pkg/errs"
 	"bbs-go/internal/pkg/locales"
 	"bbs-go/internal/spam"
 	"log/slog"
@@ -44,7 +43,6 @@ func bindArticleForm(ctx *gin.Context) (req.CreateArticleReq, error) {
 // 编辑时获取详情
 // 编辑文章
 // 删除文章
-// 收藏文章
 // 文章跳转链接
 // 用户文章列表
 // 文章列表
@@ -237,28 +235,6 @@ func ArticleRemove(ctx *gin.Context) {
 	// 操作日志
 	services.OperateLogService.AddOperateLog(user.Id, constants.OpTypeDelete, constants.EntityArticle, articleId,
 		"", ctx.Request)
-	ginx.WriteJSON(ctx, nil)
-
-}
-
-func ArticleFavorite(ctx *gin.Context) {
-	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
-	if err != nil {
-		ginx.WriteJSON(ctx, err)
-		return
-	}
-	articleId := id
-
-	user := common.GetCurrentUser(ctx)
-	if user == nil {
-		ginx.WriteJSON(ctx, errs.NotLogin())
-		return
-	}
-	err = services.FavoriteService.AddArticleFavorite(user.Id, articleId)
-	if err != nil {
-		ginx.WriteJSON(ctx, err)
-		return
-	}
 	ginx.WriteJSON(ctx, nil)
 
 }

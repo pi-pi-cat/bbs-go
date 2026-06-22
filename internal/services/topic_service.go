@@ -9,7 +9,7 @@ import (
 	"errors"
 	"math"
 	"net/http"
-	"strconv"
+	"strings"
 
 	"bbs-go/internal/pkg/params"
 
@@ -89,13 +89,6 @@ func (s *topicService) Delete(topicId, deleteUserId int64, r *http.Request) erro
 		return nil
 	}
 	err := sqls.WithTransaction(func(ctx *sqls.TxContext) error {
-		// 问答帖未采纳答案即被删除时，将悬赏积分退还给发帖人
-		if topic.Type == constants.TopicTypeQA && topic.BountyScore > 0 && topic.AcceptedCommentId == 0 {
-			if err := UserService.AddScoreTx(ctx, topic.UserId, topic.BountyScore, constants.SourceTypeQaBountyRefund,
-				strconv.FormatInt(topic.Id, 10), locales.Get("topic.bounty_refund")); err != nil {
-				return err
-			}
-		}
 		if err := repositories.TopicRepository.UpdateColumn(ctx.Tx, topicId, "status", constants.StatusDeleted); err != nil {
 			return err
 		}
@@ -182,10 +175,16 @@ func (s *topicService) Edit(userId, topicId int64, form req.EditTopicReq) error 
 			err    error
 		)
 		if err = repositories.TopicRepository.Updates(ctx.Tx, topicId, map[string]interface{}{
-			"category_id":  form.CategoryId,
-			"title":        form.Title,
-			"content":      form.Content,
-			"hide_content": hideContent,
+			"category_id":    form.CategoryId,
+			"title":          form.Title,
+			"content":        form.Content,
+			"hide_content":   hideContent,
+			"platform_area":  strings.TrimSpace(form.PlatformArea),
+			"business_scene": strings.TrimSpace(form.BusinessScene),
+			"issue_source":   strings.TrimSpace(form.IssueSource),
+			"issue_priority": strings.TrimSpace(form.IssuePriority),
+			"issue_severity": strings.TrimSpace(form.IssueSeverity),
+			"issue_owner":    strings.TrimSpace(form.IssueOwner),
 		}); err != nil {
 			return err
 		}
@@ -269,17 +268,11 @@ func (s *topicService) GetTopicTags(topicId int64) []models.Tag {
 	return cache.TagCache.GetList(tagIds)
 }
 
-// GetTopics 帖子列表（最新、推荐、关注、节点）
+// GetTopics 帖子列表（最新、推荐、节点）
 func (s *topicService) GetTopics(user *models.User, categoryId, cursor int64, qaStatus, sort string) (topics []models.Topic, nextCursor int64, hasMore bool) {
 	var limit int = 20
-	if categoryId == constants.CategoryIdFollow {
-		if user != nil {
-			return s._GetFollowTopics(user.Id, cursor)
-		}
-		return
-	} else {
-		return s._GetCategoryTopics(categoryId, cursor, limit, qaStatus, sort)
-	}
+	_ = user
+	return s._GetCategoryTopics(categoryId, cursor, limit, qaStatus, sort)
 }
 
 // _GetCategoryTopics 帖子列表（最新、推荐、节点）
@@ -322,33 +315,6 @@ func (s *topicService) _GetCategoryTopics(categoryId, cursor int64, limit int, q
 	} else {
 		nextCursor = cursor
 	}
-	return
-}
-
-// _GetFollowTopics 关注帖子列表
-func (s *topicService) _GetFollowTopics(userId int64, cursor int64) (topics []models.Topic, nextCursor int64, hasMore bool) {
-	var limit = 20
-	cnd := sqls.NewCnd().Eq("user_id", userId)
-	cnd.Eq("data_type", constants.EntityTopic)
-	if cursor > 0 {
-		cnd.Lt("create_time", cursor)
-	}
-	cnd.Desc("create_time").Limit(limit)
-
-	userFeeds := repositories.UserFeedRepository.Find(sqls.DB(), cnd)
-	if len(userFeeds) > 0 {
-		nextCursor = userFeeds[len(userFeeds)-1].CreateTime
-		hasMore = len(userFeeds) >= limit
-	} else {
-		nextCursor = cursor
-	}
-
-	var topicIds []int64
-	for _, item := range userFeeds {
-		topicIds = append(topicIds, item.DataId)
-	}
-	topics = TopicService.GetTopicByIds(topicIds)
-
 	return
 }
 
@@ -568,11 +534,6 @@ func (s *topicService) AcceptAnswer(topicId, commentId, userId int64, isAdmin bo
 		}); err != nil {
 			return err
 		}
-		if topic.BountyScore > 0 && comment.UserId != topic.UserId {
-			if err := UserService.AddScoreTx(ctx, comment.UserId, topic.BountyScore, constants.SourceTypeQaBounty, strconv.FormatInt(topic.Id, 10), locales.Get("topic.bounty_reward")); err != nil {
-				return err
-			}
-		}
 		return nil
 	}); err != nil {
 		return err
@@ -627,4 +588,20 @@ func (s *topicService) ForceSetQaStatus(topicId int64, qaStatus constants.QaStat
 		columns["accepted_comment_id"] = 0
 	}
 	return s.Updates(topic.Id, columns)
+}
+
+func (s *topicService) UpdateIssueStatus(topicId int64, issueStatus constants.IssueStatus) error {
+	topic := s.Get(topicId)
+	if topic == nil || topic.Status != constants.StatusOk {
+		return errors.New(locales.Get("common.not_found"))
+	}
+	if topic.Type != constants.TopicTypeQA {
+		return errors.New(locales.Get("topic.type_not_supported"))
+	}
+	if !constants.IsValidIssueStatus(issueStatus) {
+		return errors.New("invalid issue status")
+	}
+	return s.Updates(topic.Id, map[string]interface{}{
+		"issue_status": issueStatus,
+	})
 }

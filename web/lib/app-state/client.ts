@@ -14,15 +14,10 @@ export async function loadClientAppState(): Promise<ClientAppStateHydration> {
     apiFetch<SiteConfig>("/api/config/configs").catch(() => undefined),
     apiFetch<UserSummary | null>("/api/user/current").catch(() => null),
   ])
-  const unreadMessageCount = currentUser
-    ? await apiFetch<{ count?: number }>("/api/user/msg_recent")
-        .then((data) => data.count || 0)
-        .catch(() => 0)
-    : 0
 
   return {
     config,
     currentUser,
-    unreadMessageCount,
+    unreadMessageCount: 0,
   }
 }

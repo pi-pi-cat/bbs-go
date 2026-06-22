@@ -114,29 +114,6 @@ func NewArticleDoc(article *models.Article) *ArticleDocument {
 	return doc
 }
 
-func NewUserDoc(user *models.User) *UserDocument {
-	if user == nil {
-		return nil
-	}
-	return &UserDocument{
-		Type:         EntityTypeUser,
-		Id:           user.Id,
-		Username:     html.EscapeString(user.Username.String),
-		Nickname:     html.EscapeString(user.Nickname),
-		Avatar:       user.Avatar,
-		Description:  html.EscapeString(user.Description),
-		Status:       user.Status,
-		TopicCount:   user.TopicCount,
-		CommentCount: user.CommentCount,
-		FansCount:    user.FansCount,
-		FollowCount:  user.FollowCount,
-		Score:        user.Score,
-		Exp:          user.Exp,
-		Level:        user.Level,
-		CreateTime:   user.CreateTime,
-	}
-}
-
 func getTopicTags(topicId int64) []models.Tag {
 	topicTags := repositories.TopicTagRepository.Find(sqls.DB(), sqls.NewCnd().Where("topic_id = ?", topicId))
 
@@ -192,23 +169,6 @@ func UpdateArticleIndex(article *models.Article) {
 
 func DeleteArticleIndex(id int64) error {
 	return index.Delete(searchDocID(EntityTypeArticle, id))
-}
-
-func UpdateUserIndex(user *models.User) {
-	doc := NewUserDoc(user)
-	if doc == nil {
-		return
-	}
-	err := index.Index(searchDocID(EntityTypeUser, user.Id), doc)
-	if err != nil {
-		slog.Error(err.Error())
-	} else {
-		slog.Info("add user search index", slog.Any("id", user.Id))
-	}
-}
-
-func DeleteUserIndex(id int64) error {
-	return index.Delete(searchDocID(EntityTypeUser, id))
 }
 
 // 分页查询
@@ -341,41 +301,6 @@ func SearchArticle(keyword string, timeRange, page, limit int) (docs []ArticleDo
 	return
 }
 
-func SearchUser(keyword string, page, limit int) (docs []UserDocument, paging *sqls.Paging, err error) {
-	paging = &sqls.Paging{Page: page, Limit: limit}
-
-	query := bleve.NewBooleanQuery()
-	query.AddMust(bleve.NewMatchAllQuery())
-	query.AddMust(typeQuery(EntityTypeUser))
-	if strs.IsNotBlank(keyword) {
-		query.AddMust(keywordQuery(keyword, []string{"username", "nickname", "description"}))
-	}
-
-	searchRequest := bleve.NewSearchRequest(query)
-	searchRequest.From = paging.Offset()
-	searchRequest.Size = paging.Limit
-	searchRequest.Fields = []string{"*"}
-	searchRequest.Highlight = bleve.NewHighlightWithStyle("html")
-	searchRequest.Highlight.AddField("nickname")
-	searchRequest.Highlight.AddField("username")
-	searchRequest.Highlight.AddField("description")
-
-	result, err := index.Search(searchRequest)
-	if err != nil {
-		slog.Error("搜索失败:", slog.Any("err", err))
-		return
-	}
-	for _, hit := range result.Hits {
-		storedDoc := hitFields(hit.Fields, hit.Fragments)
-		var doc UserDocument
-		if err := mapstructure.Decode(storedDoc, &doc); err != nil {
-			slog.Error(err.Error())
-		}
-		docs = append(docs, doc)
-	}
-	return
-}
-
 func SearchAll(keyword string, limit int) (AllResult, error) {
 	if limit <= 0 {
 		limit = 5
@@ -388,11 +313,7 @@ func SearchAll(keyword string, limit int) (AllResult, error) {
 	if err != nil {
 		return AllResult{}, err
 	}
-	users, _, err := SearchUser(keyword, 1, limit)
-	if err != nil {
-		return AllResult{}, err
-	}
-	return AllResult{Topics: topics, Articles: articles, Users: users}, nil
+	return AllResult{Topics: topics, Articles: articles}, nil
 }
 
 func buildCategoryQuery(categoryId int64, categoryIds []int64) blevequery.Query {

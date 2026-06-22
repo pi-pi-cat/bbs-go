@@ -12,6 +12,16 @@ func TestAdminPermissionRegistryMatchesMethodAndPath(t *testing.T) {
 	}
 }
 
+func TestAdminPermissionRegistryProtectsIssueStatusUpdate(t *testing.T) {
+	code, ok := GetAdminPermissionCode("POST", "/api/admin/topic/update_issue_status")
+	if !ok {
+		t.Fatalf("expected issue status update permission to be registered")
+	}
+	if code != PermissionTopicSolve.Code {
+		t.Fatalf("expected %s, got %s", PermissionTopicSolve.Code, code)
+	}
+}
+
 func TestAdminPermissionRegistryAllowsRoleOptionsFromUserUpdate(t *testing.T) {
 	codes, ok := GetAdminPermissionCodes("GET", "/api/admin/role/roles")
 	if !ok {
@@ -54,46 +64,6 @@ func TestAdminPermissionRegistryProtectsForbiddenWordDelete(t *testing.T) {
 	}
 }
 
-func TestAdminPermissionRegistryProtectsBadgeUpdateSort(t *testing.T) {
-	code, ok := GetAdminPermissionCode("POST", "/api/admin/badge/update_sort")
-	if !ok {
-		t.Fatalf("expected badge sort permission to be registered")
-	}
-	if code != PermissionBadgeUpdate.Code {
-		t.Fatalf("expected %s, got %s", PermissionBadgeUpdate.Code, code)
-	}
-}
-
-func TestAdminPermissionRegistryProtectsTaskConfigUpdateSort(t *testing.T) {
-	code, ok := GetAdminPermissionCode("POST", "/api/admin/task-config/update_sort")
-	if !ok {
-		t.Fatalf("expected task config sort permission to be registered")
-	}
-	if code != PermissionTaskUpdate.Code {
-		t.Fatalf("expected %s, got %s", PermissionTaskUpdate.Code, code)
-	}
-}
-
-func TestAdminPermissionRegistryProtectsLinkDelete(t *testing.T) {
-	code, ok := GetAdminPermissionCode("POST", "/api/admin/link/delete")
-	if !ok {
-		t.Fatalf("expected link delete permission to be registered")
-	}
-	if code != PermissionLinkDelete.Code {
-		t.Fatalf("expected %s, got %s", PermissionLinkDelete.Code, code)
-	}
-}
-
-func TestAdminPermissionRegistryProtectsLinkUpdateSort(t *testing.T) {
-	code, ok := GetAdminPermissionCode("POST", "/api/admin/link/update_sort")
-	if !ok {
-		t.Fatalf("expected link sort permission to be registered")
-	}
-	if code != PermissionLinkUpdate.Code {
-		t.Fatalf("expected %s, got %s", PermissionLinkUpdate.Code, code)
-	}
-}
-
 func TestAdminPermissionRegistryProtectsUserReportAudit(t *testing.T) {
 	code, ok := GetAdminPermissionCode("POST", "/api/admin/user-report/audit")
 	if !ok {
@@ -101,6 +71,37 @@ func TestAdminPermissionRegistryProtectsUserReportAudit(t *testing.T) {
 	}
 	if code != PermissionUserReportAudit.Code {
 		t.Fatalf("expected %s, got %s", PermissionUserReportAudit.Code, code)
+	}
+}
+
+func TestAdminPermissionRegistryRejectsRemovedGrowthAndLinkPaths(t *testing.T) {
+	paths := []struct {
+		method string
+		path   string
+	}{
+		{method: "GET", path: "/api/admin/link/1"},
+		{method: "POST", path: "/api/admin/link/list"},
+		{method: "POST", path: "/api/admin/link/delete"},
+		{method: "GET", path: "/api/admin/badge/1"},
+		{method: "POST", path: "/api/admin/badge/list"},
+		{method: "POST", path: "/api/admin/badge/update_sort"},
+		{method: "GET", path: "/api/admin/level-config/1"},
+		{method: "POST", path: "/api/admin/level-config/list"},
+		{method: "GET", path: "/api/admin/task-config/1"},
+		{method: "POST", path: "/api/admin/task-config/list"},
+		{method: "POST", path: "/api/admin/task-config/update_sort"},
+		{method: "GET", path: "/api/admin/user-task-log/1"},
+		{method: "POST", path: "/api/admin/user-task-log/list"},
+		{method: "GET", path: "/api/admin/user-exp-log/1"},
+		{method: "POST", path: "/api/admin/user-exp-log/list"},
+		{method: "GET", path: "/api/admin/user-badge/1"},
+		{method: "POST", path: "/api/admin/user-badge/list"},
+	}
+
+	for _, path := range paths {
+		if code, ok := GetAdminPermissionCode(path.method, path.path); ok {
+			t.Fatalf("expected %s %s to be rejected, got %s", path.method, path.path, code)
+		}
 	}
 }
 

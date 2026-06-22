@@ -48,17 +48,3 @@ func SearchArticle(ctx *gin.Context) {
 	}
 	ginx.WriteJSON(ctx, ginx.CursorData(render.BuildSearchArticles(list), cast.ToString(cursor+1), len(list) >= limit))
 }
-
-func SearchUser(ctx *gin.Context) {
-	var (
-		cursor  = params.FormValueIntDefault(ctx, "cursor", 1)
-		keyword = params.FormValue(ctx, "keyword")
-		limit   = 20
-	)
-	list, _, err := search.SearchUser(keyword, cursor, limit)
-	if err != nil {
-		ginx.WriteJSON(ctx, err)
-		return
-	}
-	ginx.WriteJSON(ctx, ginx.CursorData(render.BuildSearchUsers(list), cast.ToString(cursor+1), len(list) >= limit))
-}

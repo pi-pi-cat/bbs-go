@@ -25,7 +25,6 @@ func BuildTopic(ctx *gin.Context, topic *models.Topic) *resp.TopicResponse {
 
 	if currentUser := common.GetCurrentUser(ctx); currentUser != nil {
 		rsp.Liked = services.UserLikeService.Exists(currentUser.Id, constants.EntityTopic, topic.Id)
-		rsp.Favorited = services.FavoriteService.IsFavorited(currentUser.Id, constants.EntityTopic, topic.Id)
 	}
 
 	if vote := services.VoteService.Get(topic.VoteId); vote != nil {
@@ -67,7 +66,6 @@ func BuildAttachmentResponses(list []models.Attachment, currentUser *models.User
 			Id:            att.Id,
 			FileName:      att.FileName,
 			FileSize:      att.FileSize,
-			DownloadScore: att.DownloadScore,
 			DownloadCount: att.DownloadCount,
 			Downloaded:    downloadedMap[att.Id],
 		})
@@ -116,9 +114,15 @@ func _buildTopic(topic *models.Topic, buildContent bool) *resp.TopicResponse {
 	rsp.Id = idcodec.Encode(topic.Id)
 	rsp.Type = topic.Type
 	rsp.QaStatus = topic.QaStatus
+	rsp.IssueStatus = topic.IssueStatus
+	rsp.IssueSource = topic.IssueSource
+	rsp.IssuePriority = topic.IssuePriority
+	rsp.IssueSeverity = topic.IssueSeverity
+	rsp.IssueOwner = topic.IssueOwner
+	rsp.PlatformArea = topic.PlatformArea
+	rsp.BusinessScene = topic.BusinessScene
 	rsp.AcceptedCommentId = topic.AcceptedCommentId
 	rsp.SolvedAt = topic.SolvedAt
-	rsp.BountyScore = topic.BountyScore
 	rsp.Title = topic.Title
 	rsp.User = BuildUserInfoDefaultIfNull(topic.UserId)
 	rsp.LastCommentTime = topic.LastCommentTime

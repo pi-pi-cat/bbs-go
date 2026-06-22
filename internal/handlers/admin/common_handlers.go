@@ -3,7 +3,6 @@ package admin
 import (
 	"bbs-go/internal/models"
 	"bbs-go/internal/models/constants"
-	"bbs-go/internal/pkg/config"
 	"bbs-go/internal/repositories"
 	"time"
 
@@ -47,12 +46,6 @@ func buildRecentUserItems(users []models.User) []dashboardRecentItem {
 	return items
 }
 
-type TaskEventTypeItem struct {
-	Value string `json:"value"`
-	Title string `json:"title"`
-}
-
-// GetTask_event_types 获取任务事件类型枚举（用于后台下拉选择）
 func CommonOverview(ctx *gin.Context) {
 
 	now := time.Now()
@@ -60,21 +53,28 @@ func CommonOverview(ctx *gin.Context) {
 	db := sqls.DB()
 
 	metrics := map[string]int64{
-		"totalUsers":    repositories.UserRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
-		"totalTopics":   repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
-		"totalArticles": repositories.ArticleRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
-		"todayUsers":    repositories.UserRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Gte("create_time", todayStart)),
-		"todayTopics":   repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Gte("create_time", todayStart)),
+		"totalUsers":       repositories.UserRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
+		"totalTopics":      repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
+		"totalArticles":    repositories.ArticleRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
+		"todayUsers":       repositories.UserRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Gte("create_time", todayStart)),
+		"todayTopics":      repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Gte("create_time", todayStart)),
+		"totalIssues":      repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA)),
+		"totalKnowledge":   repositories.ArticleRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk)),
+		"todayIssues":      repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA).Gte("create_time", todayStart)),
+		"resolvedIssues":   repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA).Eq("issue_status", constants.IssueStatusResolved)),
+		"processingIssues": repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA).Eq("issue_status", constants.IssueStatusProcessing)),
 	}
 
 	pending := map[string]int64{
-		"pendingTopics":   repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusReview)),
-		"pendingArticles": repositories.ArticleRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusReview)),
-		"pendingReports":  repositories.UserReportRepository.Count(db, sqls.NewCnd().Eq("audit_status", 0)),
-		"failedEmails":    repositories.EmailLogRepository.Count(db, sqls.NewCnd().Eq("status", constants.EmailLogStatusFailed)),
+		"pendingTopics":    repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusReview)),
+		"pendingArticles":  repositories.ArticleRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusReview)),
+		"pendingReports":   repositories.UserReportRepository.Count(db, sqls.NewCnd().Eq("audit_status", 0)),
+		"failedEmails":     repositories.EmailLogRepository.Count(db, sqls.NewCnd().Eq("status", constants.EmailLogStatusFailed)),
+		"openIssues":       repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA).Eq("issue_status", constants.IssueStatusOpen)),
+		"processingIssues": repositories.TopicRepository.Count(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA).Eq("issue_status", constants.IssueStatusProcessing)),
 	}
 
-	recentTopics := repositories.TopicRepository.Find(db, sqls.NewCnd().Eq("status", constants.StatusOk).Desc("id").Limit(5))
+	recentTopics := repositories.TopicRepository.Find(db, sqls.NewCnd().Eq("status", constants.StatusOk).Eq("type", constants.TopicTypeQA).Desc("id").Limit(5))
 	recentUsers := repositories.UserRepository.Find(db, sqls.NewCnd().Eq("status", constants.StatusOk).Desc("id").Limit(5))
 
 	ginx.WriteJSON(ctx, web.NewEmptyRspBuilder().
@@ -85,63 +85,5 @@ func CommonOverview(ctx *gin.Context) {
 			"users":  buildRecentUserItems(recentUsers),
 		}).
 		JsonResult())
-
-}
-
-func CommonTaskEventTypes(ctx *gin.Context) {
-
-	lang := config.Instance.Language
-	if !lang.IsValid() {
-		lang = config.DefaultLanguage
-	}
-
-	items := []TaskEventTypeItem{
-		{Value: constants.TaskEventTypeUserLogin},
-		{Value: constants.TaskEventTypeCheckIn},
-		{Value: constants.TaskEventTypeTopicCreate},
-		{Value: constants.TaskEventTypeQaQuestion},
-		{Value: constants.TaskEventTypeQaAnswerAccept},
-		{Value: constants.TaskEventTypeCommentCreate},
-		{Value: constants.TaskEventTypeFollowCreate},
-		{Value: constants.TaskEventTypeFavoriteCreate},
-		{Value: constants.TaskEventTypeLikeCreate},
-		{Value: constants.TaskEventTypeLevel10},
-	}
-
-	if lang == config.LanguageEnUS {
-		titleMap := map[string]string{
-			constants.TaskEventTypeUserLogin:      "Daily login",
-			constants.TaskEventTypeCheckIn:        "Check-in",
-			constants.TaskEventTypeTopicCreate:    "Create topic",
-			constants.TaskEventTypeQaQuestion:     "Publish question",
-			constants.TaskEventTypeQaAnswerAccept: "Answer accepted",
-			constants.TaskEventTypeCommentCreate:  "Create comment",
-			constants.TaskEventTypeFollowCreate:   "Follow user",
-			constants.TaskEventTypeFavoriteCreate: "Favorite",
-			constants.TaskEventTypeLikeCreate:     "Like",
-			constants.TaskEventTypeLevel10:        "Reach level 10",
-		}
-		for i := range items {
-			items[i].Title = titleMap[items[i].Value]
-		}
-	} else {
-		titleMap := map[string]string{
-			constants.TaskEventTypeUserLogin:      "每日登录",
-			constants.TaskEventTypeCheckIn:        "签到",
-			constants.TaskEventTypeTopicCreate:    "发帖",
-			constants.TaskEventTypeQaQuestion:     "发布问题",
-			constants.TaskEventTypeQaAnswerAccept: "回答被采纳",
-			constants.TaskEventTypeCommentCreate:  "评论",
-			constants.TaskEventTypeFollowCreate:   "关注用户",
-			constants.TaskEventTypeFavoriteCreate: "收藏",
-			constants.TaskEventTypeLikeCreate:     "点赞",
-			constants.TaskEventTypeLevel10:        "达到等级 10",
-		}
-		for i := range items {
-			items[i].Title = titleMap[items[i].Value]
-		}
-	}
-
-	ginx.WriteJSON(ctx, items)
 
 }

@@ -2,7 +2,6 @@ import { cache } from "react"
 
 import { getSiteConfig } from "@/lib/api/site"
 import type { SiteConfig, UserSummary } from "@/lib/api/types"
-import { getRecentUserMessages } from "@/lib/api/users"
 import { getSessionUser } from "@/lib/auth/session"
 import { createT, type Locale, type TFunction } from "@/lib/i18n"
 import { getServerLocale } from "@/lib/i18n/server"
@@ -22,17 +21,12 @@ export const getAppState = cache(async (): Promise<AppState> => {
     getSessionUser().catch(() => null),
   ])
   const locale = await getServerLocale(config?.language)
-  const unreadMessageCount = currentUser
-    ? await getRecentUserMessages()
-        .then((data) => data.count || 0)
-        .catch(() => 0)
-    : 0
 
   return {
     config,
     currentUser,
     locale,
-    unreadMessageCount,
+    unreadMessageCount: 0,
     t: createT(locale),
     isLogin: Boolean(currentUser),
   }

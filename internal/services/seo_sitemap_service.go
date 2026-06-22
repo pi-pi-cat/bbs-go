@@ -227,7 +227,6 @@ func (s *seoSitemapService) buildStaticSitemapFiles() ([]generatedSitemapFile, e
 		{Loc: bbsurls.AbsUrl("/topics")},
 		{Loc: bbsurls.AbsUrl("/articles")},
 		{Loc: bbsurls.AbsUrl("/about")},
-		{Loc: bbsurls.AbsUrl("/links")},
 	}
 
 	var categories []models.Category

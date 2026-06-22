@@ -153,7 +153,6 @@ export function TopicDetailClientPage({
           <TopicActionProvider
             topicId={topic.id}
             liked={topic.liked}
-            favorited={topic.favorited}
             likeCount={topic.likeCount}
             commentCount={topic.commentCount}
           >
@@ -185,7 +184,6 @@ export function TopicDetailClientPage({
                   view: t("pages.topic.detail.view"),
                   like: t("pages.topic.detail.like"),
                   comment: t("pages.topic.detail.comment"),
-                  favorite: t("pages.topic.detail.favorite"),
                 }}
               />
             </div>

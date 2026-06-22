@@ -12,8 +12,6 @@ import TextAlign from "@tiptap/extension-text-align"
 import { TextStyle } from "@tiptap/extension-text-style"
 import BackgroundColor from "@tiptap/extension-text-style/background-color"
 import Color from "@tiptap/extension-color"
-import TaskList from "@tiptap/extension-task-list"
-import TaskItem from "@tiptap/extension-task-item"
 import Typography from "@tiptap/extension-typography"
 import HorizontalRule from "@tiptap/extension-horizontal-rule"
 import Suggestion, { exitSuggestion, type SuggestionKeyDownProps, type SuggestionProps } from "@tiptap/suggestion"
@@ -33,7 +31,6 @@ import {
   LinkIcon,
   List,
   ListOrdered,
-  ListTodo,
   Maximize,
   Minimize,
   MinusSquare,
@@ -118,7 +115,6 @@ type RichTextEditorLabels = {
     quote: string
     bulletList: string
     orderedList: string
-    taskList: string
     alignLeft: string
     alignCenter: string
     alignRight: string
@@ -152,7 +148,6 @@ type RichTextEditorLabels = {
     heading3: { title: string; description: string }
     bulletList: { title: string; description: string }
     orderedList: { title: string; description: string }
-    taskList: { title: string; description: string }
     quote: { title: string; description: string }
     codeBlock: { title: string; description: string }
     horizontalRule: { title: string; description: string }
@@ -174,7 +169,6 @@ function createEditorLabels(t: Translate): RichTextEditorLabels {
       quote: t(key("toolbar.quote")),
       bulletList: t(key("toolbar.bulletList")),
       orderedList: t(key("toolbar.orderedList")),
-      taskList: t(key("toolbar.taskList")),
       alignLeft: t(key("toolbar.alignLeft")),
       alignCenter: t(key("toolbar.alignCenter")),
       alignRight: t(key("toolbar.alignRight")),
@@ -225,10 +219,6 @@ function createEditorLabels(t: Translate): RichTextEditorLabels {
       orderedList: {
         title: t(key("slash.orderedList.title")),
         description: t(key("slash.orderedList.description")),
-      },
-      taskList: {
-        title: t(key("slash.taskList.title")),
-        description: t(key("slash.taskList.description")),
       },
       quote: {
         title: t(key("slash.quote.title")),
@@ -445,7 +435,6 @@ function slashItems(labels: RichTextEditorLabels, locale: string): SlashCommandI
         heading3: ["h3", "三级标题", "heading3"],
         bulletList: ["ul", "bullet", "list", "无序列表"],
         orderedList: ["ol", "ordered", "numbered", "有序列表"],
-        taskList: ["task", "todo", "checklist", "任务列表", "待办"],
         quote: ["quote", "blockquote", "引用", "引用文本"],
         codeBlock: ["code", "codeblock", "代码", "代码块"],
         horizontalRule: ["hr", "line", "divider", "分割线"],
@@ -457,7 +446,6 @@ function slashItems(labels: RichTextEditorLabels, locale: string): SlashCommandI
         heading3: ["h3", "heading3"],
         bulletList: ["ul", "bullet", "list"],
         orderedList: ["ol", "ordered", "numbered"],
-        taskList: ["task", "todo", "checklist"],
         quote: ["quote", "blockquote"],
         codeBlock: ["code", "codeblock"],
         horizontalRule: ["hr", "line", "divider"],
@@ -505,13 +493,6 @@ function slashItems(labels: RichTextEditorLabels, locale: string): SlashCommandI
       aliases: aliases.orderedList,
       icon: <ListOrdered size={18} />,
       command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleOrderedList().run(),
-    },
-    {
-      title: labels.slash.taskList.title,
-      description: labels.slash.taskList.description,
-      aliases: aliases.taskList,
-      icon: <ListTodo size={18} />,
-      command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleTaskList().run(),
     },
     {
       title: labels.slash.quote.title,
@@ -953,10 +934,6 @@ export function RichTextEditor({
       TextStyle,
       Color,
       BackgroundColor,
-      TaskList,
-      TaskItem.configure({
-        nested: true,
-      }),
       Typography,
       HorizontalRule,
       createSlashSuggestion(labels, locale),
@@ -1099,9 +1076,6 @@ export function RichTextEditor({
           </ToolbarButton>
           <ToolbarButton title={toolbar.orderedList} active={editor?.isActive("orderedList")} onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
             <ListOrdered size={16} />
-          </ToolbarButton>
-          <ToolbarButton title={toolbar.taskList} active={editor?.isActive("taskList")} onClick={() => editor?.chain().focus().toggleTaskList().run()}>
-            <ListTodo size={16} />
           </ToolbarButton>
           <ToolbarDivider />
           <ToolbarButton title={toolbar.alignLeft} active={editor?.isActive({ textAlign: "left" })} onClick={() => editor?.chain().focus().setTextAlign("left").run()}>

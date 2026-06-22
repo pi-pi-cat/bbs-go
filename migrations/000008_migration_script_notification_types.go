@@ -19,18 +19,7 @@ func migrate_notification_types_defaults() error {
 		if existing != nil && existing.Value != "" {
 			return nil
 		}
-		defaults := map[string]dto.NoticeTypeConfig{
-			"topicComment":     {Site: true, Email: true},
-			"commentReply":     {Site: true, Email: true},
-			"topicLike":        {Site: true, Email: true},
-			"topicFavorite":    {Site: true, Email: true},
-			"topicRecommend":   {Site: true, Email: true},
-			"topicDelete":      {Site: true, Email: false},
-			"articleComment":   {Site: true, Email: true},
-			"userLevelUp":      {Site: true, Email: true},
-			"userBadgeGrant":   {Site: true, Email: true},
-			"qaAnswerAccepted": {Site: true, Email: true},
-		}
+		defaults := defaultNotificationTypeConfigs()
 		value := jsons.ToJsonStr(defaults)
 		if existing == nil {
 			return repositories.SysConfigRepository.Create(tx, &models.SysConfig{
@@ -46,4 +35,16 @@ func migrate_notification_types_defaults() error {
 		existing.UpdateTime = now
 		return repositories.SysConfigRepository.Update(tx, existing)
 	})
+}
+
+func defaultNotificationTypeConfigs() map[string]dto.NoticeTypeConfig {
+	return map[string]dto.NoticeTypeConfig{
+		"topicComment":     {Site: true, Email: true},
+		"commentReply":     {Site: true, Email: true},
+		"topicLike":        {Site: true, Email: true},
+		"topicRecommend":   {Site: true, Email: true},
+		"topicDelete":      {Site: true, Email: false},
+		"articleComment":   {Site: true, Email: true},
+		"qaAnswerAccepted": {Site: true, Email: true},
+	}
 }

@@ -1,12 +1,4 @@
 import { apiFetch, toFormData } from "@/lib/api/client"
-import type {
-  Favorite,
-  PageData,
-  ScoreLog,
-  UserMessage,
-  UserSummary,
-} from "@/lib/api/types"
-import { ApiError } from "@/lib/api/client"
 
 export interface UserActionState {
   ok: boolean
@@ -26,36 +18,6 @@ function errorMessage(error: unknown, fallback: string) {
 function formString(formData: FormData, key: string) {
   const value = formData.get(key)
   return typeof value === "string" ? value : ""
-}
-
-export async function loadFavorites(cursor?: string) {
-  return apiFetch<PageData<Favorite>>("/api/user/favorites", {
-    params: { cursor },
-  })
-}
-
-export async function loadMessages(cursor?: string) {
-  return apiFetch<PageData<UserMessage>>("/api/user/messages", {
-    params: { cursor },
-  })
-}
-
-export async function loadScoreLogs(cursor?: string) {
-  return apiFetch<PageData<ScoreLog>>("/api/user/score_logs", {
-    params: { cursor },
-  })
-}
-
-export async function loadFans(userId: string, cursor?: string) {
-  return apiFetch<PageData<UserSummary>>("/api/fans/fans", {
-    params: { userId, cursor },
-  })
-}
-
-export async function loadFollowed(userId: string, cursor?: string) {
-  return apiFetch<PageData<UserSummary>>("/api/fans/followed", {
-    params: { userId, cursor },
-  })
 }
 
 export async function requestEmailVerifyAction(): Promise<UserActionState> {
@@ -173,24 +135,6 @@ export async function updatePasswordAction(
     })
     return { ok: true }
   } catch (error) {
-    return { ok: false, message: errorMessage(error, "Failed") }
-  }
-}
-
-export async function followAction(
-  userId: string,
-  followed: boolean
-): Promise<UserActionState & { followed?: boolean }> {
-  try {
-    await apiFetch<null>(followed ? "/api/fans/unfollow" : "/api/fans/follow", {
-      method: "POST",
-      body: toFormData({ userId }),
-    })
-    return { ok: true, followed: !followed }
-  } catch (error) {
-    if (error instanceof ApiError && error.errorCode === 1) {
-      return { ok: false, message: error.message }
-    }
     return { ok: false, message: errorMessage(error, "Failed") }
   }
 }

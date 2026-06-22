@@ -40,7 +40,17 @@ export function getTopic(id: string) {
 
 export type TopicEditData = Pick<
   Topic,
-  "id" | "type" | "title" | "content" | "attachments"
+  | "id"
+  | "type"
+  | "title"
+  | "content"
+  | "attachments"
+  | "platformArea"
+  | "businessScene"
+  | "issueSource"
+  | "issuePriority"
+  | "issueSeverity"
+  | "issueOwner"
 > & {
   categoryId: number
   contentType?: "html" | "markdown" | string

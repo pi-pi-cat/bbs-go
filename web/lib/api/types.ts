@@ -24,30 +24,14 @@ export interface UserSummary {
   smallBackgroundImage?: string
   homePage?: string
   createTime?: number
-  score?: number
-  exp?: number
-  level?: number
-  levelTitle?: string
   topicCount?: number
   commentCount?: number
-  fansCount?: number
-  followCount?: number
   forbidden?: boolean
-  followed?: boolean
   roles?: string[]
   permissions?: string[]
   passwordSet?: boolean
   email?: string
   emailVerified?: boolean
-  expProgress?: {
-    currentExp?: number
-    level?: number
-    levelTitle?: string
-    expInCurrentLevel?: number
-    expNeedForNextLevel?: number
-    expProgressPercent?: number
-    isMaxLevel?: boolean
-  }
 }
 
 export interface ImageInfo {
@@ -77,7 +61,6 @@ export interface Attachment {
   id: EntityId
   fileName?: string
   fileSize?: number
-  downloadScore?: number
   downloadCount?: number
   downloaded?: boolean
 }
@@ -134,10 +117,15 @@ export interface Topic {
   viewCount?: number
   imageList?: ImageInfo[]
   qaStatus?: "solved" | "unsolved" | string
-  bountyScore?: number
+  issueStatus?: "open" | "processing" | "resolved" | "closed" | "archived" | string
+  issueSource?: string
+  issuePriority?: string
+  issueSeverity?: string
+  issueOwner?: string
+  platformArea?: string
+  businessScene?: string
   attachments?: Attachment[]
   toc?: TopicTocItem[]
-  favorited?: boolean
   ipLocation?: string
   status?: number
   vote?: TopicVote | null
@@ -190,7 +178,6 @@ export interface SiteConfig {
   topicCaptcha?: boolean
   createTopicEmailVerified?: boolean
   enableHideContent?: boolean
-  enableQaBounty?: boolean
   attachmentConfig?: {
     enabled?: boolean
     allowedTypes?: string[]
@@ -240,50 +227,6 @@ export interface ArticleEditForm {
   cover?: ImageInfo | null
 }
 
-export interface TaskGroupInfo {
-  key: string
-  name: string
-}
-
-export interface TaskProgress {
-  periodKey?: number
-  eventProgress?: number
-  eventTarget?: number
-  finishedCount?: number
-  maxFinishCount?: number
-}
-
-export interface TaskInfo {
-  id: number
-  groupName: string
-  title: string
-  description?: string
-  eventType?: string
-  period?: number
-  eventCount?: number
-  maxFinishCount?: number
-  score?: number
-  exp?: number
-  badgeId?: number
-  btnName?: string
-  actionUrl?: string
-  sortNo?: number
-  startTime?: number
-  endTime?: number
-  status?: number
-  userProgress?: TaskProgress | null
-}
-
-export interface CheckInInfo {
-  id?: number
-  userId?: number
-  latestDayName?: string
-  consecutiveDays?: number
-  checkIn?: boolean
-  updateTime?: number
-  user?: UserSummary
-}
-
 export interface LoginResult {
   user: UserSummary
   token: string
@@ -304,7 +247,6 @@ export interface Article {
   likeCount?: number
   createTime?: number
   status?: number
-  favorited?: boolean
   toc?: TopicTocItem[]
 }
 
@@ -317,68 +259,9 @@ export interface SearchArticle {
   createTime?: number
 }
 
-export interface SearchUser {
-  user?: UserSummary
-  nickname?: string
-  username?: string
-  description?: string
-  createTime?: number
-}
-
 export interface SearchAllResult {
   topics?: Topic[]
   articles?: SearchArticle[]
-  users?: SearchUser[]
-}
-
-export interface Favorite {
-  id: number
-  entityType?: string
-  entityId?: number
-  deleted?: boolean
-  title?: string
-  content?: string
-  user?: UserSummary
-  url?: string
-  createTime?: number
-}
-
-export interface UserMessage {
-  id: number
-  from: UserSummary
-  userId?: number
-  title?: string
-  content?: string
-  quoteContent?: string
-  type?: number
-  detailUrl?: string
-  extraData?: string
-  status?: number
-  createTime?: number
-}
-
-export interface ScoreLog {
-  id: number
-  userId?: number
-  sourceType?: string
-  sourceId?: string
-  description?: string
-  type: number
-  score: number
-  createTime?: number
-}
-
-export interface Badge {
-  id: number
-  name?: string
-  title?: string
-  description?: string
-  icon?: string
-  sortNo?: number
-  status?: number
-  owned?: boolean
-  worn?: boolean
-  obtainTime?: number
 }
 
 export interface BindInfo {

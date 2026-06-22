@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-  BadgeIcon,
   LayoutDashboardIcon,
   MessageSquareIcon,
   Settings2Icon,
@@ -71,11 +70,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             permission: PERMISSIONS.DASHBOARD_CATEGORY_VIEW,
           },
           {
-            title: t("dashboard.nav.links"),
-            url: "/dashboard/links",
-            permission: PERMISSIONS.DASHBOARD_LINK_VIEW,
-          },
-          {
             title: t("dashboard.nav.forbiddenWords"),
             url: "/dashboard/forbidden-words",
             permission: PERMISSIONS.DASHBOARD_FORBIDDEN_WORD_VIEW,
@@ -94,47 +88,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             permission: PERMISSIONS.DASHBOARD_USER_VIEW,
           },
           {
-            title: t("dashboard.nav.userBadges"),
-            url: "/dashboard/user-badges",
-            permission: PERMISSIONS.DASHBOARD_USER_BADGE_VIEW,
-          },
-          {
-            title: t("dashboard.nav.userExpLogs"),
-            url: "/dashboard/user-exp-logs",
-            permission: PERMISSIONS.DASHBOARD_USER_EXP_LOG_VIEW,
-          },
-          {
-            title: t("dashboard.nav.userTaskLogs"),
-            url: "/dashboard/user-task-logs",
-            permission: PERMISSIONS.DASHBOARD_USER_TASK_LOG_VIEW,
-          },
-          {
             title: t("dashboard.nav.userReports"),
             url: "/dashboard/user-reports",
             permission: PERMISSIONS.DASHBOARD_USER_REPORT_VIEW,
-          },
-        ],
-      },
-      {
-        title: t("dashboard.nav.growth"),
-        url: "/dashboard/badges",
-        icon: BadgeIcon,
-        permission: PERMISSIONS.DASHBOARD_BADGE_VIEW,
-        items: [
-          {
-            title: t("dashboard.nav.badges"),
-            url: "/dashboard/badges",
-            permission: PERMISSIONS.DASHBOARD_BADGE_VIEW,
-          },
-          {
-            title: t("dashboard.nav.levels"),
-            url: "/dashboard/levels",
-            permission: PERMISSIONS.DASHBOARD_LEVEL_VIEW,
-          },
-          {
-            title: t("dashboard.nav.tasks"),
-            url: "/dashboard/tasks",
-            permission: PERMISSIONS.DASHBOARD_TASK_VIEW,
           },
         ],
       },

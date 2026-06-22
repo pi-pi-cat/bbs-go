@@ -335,23 +335,23 @@ func initWelcomeTopic(language config.Language, userId int64) error {
 		content string
 	)
 	if language == config.LanguageZhCN {
-		title = "欢迎来到 BBS-GO 社区"
-		content = `欢迎使用 **BBS-GO**！
+		title = "欢迎使用问题库与知识库平台"
+		content = `欢迎使用 **问题库与知识库平台**！
 
-这是一个轻量、高性能、易扩展的社区系统。
+这里用于收集平台问题、跟踪处理状态，并沉淀可复用的知识条目。
 
-你可以发帖、评论、点赞，并通过任务系统获得积分与成长奖励。
+你可以从问题录入开始，补充平台模块、业务场景、来源、优先级、严重程度和责任人等信息。
 
-现在就开始发布你的第一篇帖子吧。`
+也可以通过知识库文章维护标准答案、排查经验和操作说明。`
 	} else {
-		title = "Welcome to the BBS-GO Community"
-		content = `Welcome to **BBS-GO**!
+		title = "Welcome to the Issue and Knowledge Base"
+		content = `Welcome to the **Issue and Knowledge Base**.
 
-A lightweight, high-performance, and extensible community platform.
+Use this workspace to collect product issues, track handling status, and maintain reusable knowledge entries.
 
-You can create topics, comment, like, and earn points through the task system.
+Start by recording an issue with its platform area, business scene, source, priority, severity, and owner.
 
-Start by publishing your first post.`
+Knowledge articles can hold standard answers, troubleshooting notes, and operating guidance.`
 	}
 
 	if services.TopicService.Take("user_id = ? and title = ?", userId, title) != nil {

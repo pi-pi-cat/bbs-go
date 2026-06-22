@@ -1,6 +1,6 @@
 "use client"
 
-import { Eye, Heart, MessageCircle, Star } from "lucide-react"
+import { Eye, Heart, MessageCircle } from "lucide-react"
 
 import { useTopicActions } from "@/components/topic/topic-action-context"
 import type { Topic } from "@/lib/api/types"
@@ -19,16 +19,13 @@ export function TopicDetailActions({
     view: string
     like: string
     comment: string
-    favorite: string
   }
 }) {
   const {
     liked,
-    favorited,
     likeCount,
     commentCount,
     toggleLike,
-    toggleFavorite,
     scrollToComment,
   } = useTopicActions()
 
@@ -69,24 +66,6 @@ export function TopicDetailActions({
         <div className="ml-[5px] text-foreground">
           <span>{labels.comment}</span>
           <span>{countLabel(commentCount)}</span>
-        </div>
-      </button>
-      <button
-        type="button"
-        className="group flex flex-1 items-center justify-center text-sm text-muted-foreground hover:text-primary"
-        onClick={() => void toggleFavorite("detail")}
-      >
-        <Star
-          className={cn(
-            "size-[18px] stroke-2 transition-all duration-200 group-hover:text-primary",
-            favorited
-              ? "text-destructive group-hover:text-destructive"
-              : "text-muted-foreground"
-          )}
-          fill={favorited ? "currentColor" : "none"}
-        />
-        <div className="ml-[5px] text-foreground">
-          <span>{labels.favorite}</span>
         </div>
       </button>
     </div>

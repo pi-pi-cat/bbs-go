@@ -17,7 +17,6 @@ import (
 	"github.com/mlogclub/simple/common/jsons"
 	"github.com/mlogclub/simple/common/strs"
 	"github.com/mlogclub/simple/sqls"
-	"github.com/spf13/cast"
 )
 
 var TopicPublishService = new(topicPublishService)
@@ -40,6 +39,13 @@ func (s *topicPublishService) Publish(userId int64, form req.CreateTopicReq) (*m
 	topic := &models.Topic{
 		Type:            form.Type,
 		QaStatus:        constants.QaStatusUnsolved,
+		IssueStatus:     constants.IssueStatusOpen,
+		IssueSource:     strings.TrimSpace(form.IssueSource),
+		IssuePriority:   strings.TrimSpace(form.IssuePriority),
+		IssueSeverity:   strings.TrimSpace(form.IssueSeverity),
+		IssueOwner:      strings.TrimSpace(form.IssueOwner),
+		PlatformArea:    strings.TrimSpace(form.PlatformArea),
+		BusinessScene:   strings.TrimSpace(form.BusinessScene),
 		UserId:          userId,
 		CategoryId:      form.CategoryId,
 		Title:           form.Title,
@@ -52,10 +58,6 @@ func (s *topicPublishService) Publish(userId int64, form req.CreateTopicReq) (*m
 		IpLocation:      iplocator.IpLocation(form.Ip),
 		LastCommentTime: now,
 		CreateTime:      now,
-	}
-
-	if form.Type == constants.TopicTypeQA && form.BountyScore > 0 {
-		topic.BountyScore = form.BountyScore
 	}
 
 	if len(form.ImageList) > 0 {
@@ -118,13 +120,6 @@ func (s *topicPublishService) Publish(userId int64, form req.CreateTopicReq) (*m
 					return err
 				}
 				repositories.AttachmentRepository.UpdateColumn(ctx.Tx, aid, "update_time", now)
-			}
-		}
-
-		// 问答悬赏：扣减题主积分
-		if topic.Type == constants.TopicTypeQA && topic.BountyScore > 0 {
-			if err = UserService.DecrScoreTx(ctx, userId, topic.BountyScore, constants.SourceTypeQaBounty, cast.ToString(topic.Id), locales.Get("topic.bounty_deduct")); err != nil {
-				return err
 			}
 		}
 
@@ -233,39 +228,6 @@ func (s topicPublishService) checkParams(userId int64, form req.CreateTopicReq) 
 	}
 	if form.Type == constants.TopicTypeQA {
 		form.Vote = nil
-		if !SysConfigService.IsEnableQaBounty() {
-			form.BountyScore = 0
-		} else {
-			if form.BountyScore < 0 {
-				return errors.New(locales.Get("topic.bounty_invalid"))
-			}
-			if SysConfigService.IsQaBountyRequired() {
-				minVal := SysConfigService.GetQaBountyMin()
-				if form.BountyScore < minVal {
-					return errors.New(locales.Get("topic.bounty_required"))
-				}
-			}
-			if form.BountyScore > 0 {
-				minVal := SysConfigService.GetQaBountyMin()
-				maxVal := SysConfigService.GetQaBountyMax()
-				if minVal > 0 && form.BountyScore < minVal {
-					if maxVal > 0 {
-						return errors.New(locales.Getf("topic.bounty_out_of_range_range", minVal, maxVal))
-					}
-					return errors.New(locales.Getf("topic.bounty_out_of_range_min", minVal))
-				}
-				if maxVal > 0 && form.BountyScore > maxVal {
-					if minVal > 0 {
-						return errors.New(locales.Getf("topic.bounty_out_of_range_range", minVal, maxVal))
-					}
-					return errors.New(locales.Getf("topic.bounty_out_of_range_max", maxVal))
-				}
-				user := repositories.UserRepository.Get(sqls.DB(), userId)
-				if user == nil || user.Score < form.BountyScore {
-					return errors.New(locales.Get("topic.insufficient_score"))
-				}
-			}
-		}
 	}
 	if err = VoteService.CheckCreateForm(form.Vote); err != nil {
 		return err

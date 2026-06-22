@@ -159,27 +159,18 @@ func TestHandlersDoNotUseControllerStyleStructReceivers(t *testing.T) {
 
 func TestGinRouterRegistersCompatibleAPIPaths(t *testing.T) {
 	app := newRouter()
-	routes := map[string]struct{}{}
-	for _, route := range app.Routes() {
-		routes[route.Method+" "+route.Path] = struct{}{}
-	}
+	routes := registeredRoutes(app)
 
 	for _, want := range []string{
 		http.MethodGet + " /api/topic/category_navs",
-		http.MethodGet + " /api/user/score/rank",
 		http.MethodGet + " /api/login/wx_login_config",
 		http.MethodPost + " /api/topic/accept_answer/:id",
+		http.MethodPost + " /api/admin/topic/update_issue_status",
 		http.MethodGet + " /api/admin/search/reindex/status",
 		http.MethodPost + " /api/admin/search/reindex",
 		http.MethodGet + " /api/admin/seo/sitemap/status",
 		http.MethodPost + " /api/admin/seo/sitemap/generate",
 		http.MethodPost + " /api/admin/role/list",
-		http.MethodPost + " /api/admin/link/delete",
-		http.MethodPost + " /api/admin/link/update_sort",
-		http.MethodPost + " /api/admin/badge/update_sort",
-		http.MethodPost + " /api/admin/task-config/update_sort",
-		http.MethodGet + " /api/admin/badge/list",
-		http.MethodPost + " /api/admin/badge/list",
 		http.MethodPost + " /api/admin/role/update_sort",
 		http.MethodDelete + " /api/admin/topic/recommend",
 	} {
@@ -198,4 +189,85 @@ func TestGinRouterRegistersCompatibleAPIPaths(t *testing.T) {
 			t.Fatalf("route %q should not be registered", notWant)
 		}
 	}
+}
+
+func TestSimplifiedProductDoesNotRegisterRemovedCommunityGrowthAPIRoutes(t *testing.T) {
+	app := newRouter()
+	routes := registeredRoutes(app)
+
+	for _, notWant := range []string{
+		http.MethodGet + " /api/topic/favorite/:id",
+		http.MethodPost + " /api/article/favorite/:id",
+		http.MethodGet + " /api/user/favorites",
+		http.MethodGet + " /api/user/msg_recent",
+		http.MethodGet + " /api/user/messages",
+		http.MethodGet + " /api/user/score_logs",
+		http.MethodGet + " /api/user/score/rank",
+		http.MethodPost + " /api/favorite/add",
+		http.MethodPost + " /api/favorite/delete",
+		http.MethodPost + " /api/checkin/checkin",
+		http.MethodGet + " /api/checkin/checkin",
+		http.MethodGet + " /api/checkin/rank",
+		http.MethodGet + " /api/link/list",
+		http.MethodGet + " /api/link/top_links",
+		http.MethodGet + " /api/search/user",
+		http.MethodPost + " /api/fans/follow",
+		http.MethodPost + " /api/fans/unfollow",
+		http.MethodGet + " /api/fans/is_followed",
+		http.MethodGet + " /api/fans/fans",
+		http.MethodGet + " /api/fans/followed",
+		http.MethodGet + " /api/fans/recent/fans",
+		http.MethodGet + " /api/fans/recent/follow",
+		http.MethodGet + " /api/task/tasks",
+		http.MethodGet + " /api/task/groups",
+		http.MethodGet + " /api/badge/badges",
+		http.MethodGet + " /api/admin/common/task_event_types",
+		http.MethodPost + " /api/admin/favorite/list",
+		http.MethodPost + " /api/admin/favorite/create",
+		http.MethodPost + " /api/admin/favorite/update",
+		http.MethodGet + " /api/admin/favorite/:id",
+		http.MethodPost + " /api/admin/link/list",
+		http.MethodPost + " /api/admin/link/create",
+		http.MethodPost + " /api/admin/link/update",
+		http.MethodPost + " /api/admin/link/delete",
+		http.MethodPost + " /api/admin/link/update_sort",
+		http.MethodGet + " /api/admin/link/:id",
+		http.MethodPost + " /api/admin/user-score-log/list",
+		http.MethodGet + " /api/admin/user-score-log/:id",
+		http.MethodGet + " /api/admin/task-config/groups",
+		http.MethodPost + " /api/admin/task-config/list",
+		http.MethodPost + " /api/admin/task-config/create",
+		http.MethodPost + " /api/admin/task-config/update",
+		http.MethodPost + " /api/admin/task-config/delete",
+		http.MethodPost + " /api/admin/task-config/update_sort",
+		http.MethodGet + " /api/admin/task-config/:id",
+		http.MethodGet + " /api/admin/badge/list",
+		http.MethodPost + " /api/admin/badge/list",
+		http.MethodPost + " /api/admin/badge/create",
+		http.MethodPost + " /api/admin/badge/update",
+		http.MethodPost + " /api/admin/badge/delete",
+		http.MethodPost + " /api/admin/badge/update_sort",
+		http.MethodGet + " /api/admin/badge/:id",
+		http.MethodPost + " /api/admin/level-config/list",
+		http.MethodPost + " /api/admin/level-config/save_all",
+		http.MethodGet + " /api/admin/level-config/:id",
+		http.MethodPost + " /api/admin/user-task-log/list",
+		http.MethodGet + " /api/admin/user-task-log/:id",
+		http.MethodPost + " /api/admin/user-exp-log/list",
+		http.MethodGet + " /api/admin/user-exp-log/:id",
+		http.MethodPost + " /api/admin/user-badge/list",
+		http.MethodGet + " /api/admin/user-badge/:id",
+	} {
+		if _, ok := routes[notWant]; ok {
+			t.Fatalf("route %q should not be registered in the simplified product", notWant)
+		}
+	}
+}
+
+func registeredRoutes(app *gin.Engine) map[string]struct{} {
+	routes := map[string]struct{}{}
+	for _, route := range app.Routes() {
+		routes[route.Method+" "+route.Path] = struct{}{}
+	}
+	return routes
 }

@@ -19,9 +19,6 @@ func init() {
 func handleTopicDeleteEvent(i interface{}) {
 	e := i.(event.TopicDeleteEvent)
 
-	// 处理userFeed
-	services.UserFeedService.DeleteByDataId(e.TopicId, constants.EntityTopic)
-
 	// 发送消息
 	sendTopicDeleteMsg(e.TopicId, e.DeleteUserId)
 

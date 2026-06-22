@@ -40,11 +40,6 @@ func topicGetBuiltInCategories() []resp.CategoryResponse {
 			Name: locales.Get("topic.category.recommend"),
 			Logo: "/res/images/category_recommend.png",
 		},
-		{
-			Id:   -2,
-			Name: locales.Get("topic.category.follow"),
-			Logo: "/res/images/category_follow.png",
-		},
 	}
 }
 
@@ -63,7 +58,6 @@ func topicGetBuiltInCategories() []resp.CategoryResponse {
 // 采纳答案
 // 取消采纳答案
 // 标签帖子列表
-// 收藏
 // 设置置顶
 func CategoryNavs(ctx *gin.Context) {
 
@@ -179,15 +173,21 @@ func TopicEditForm(ctx *gin.Context) {
 	attachments := render.BuildAttachmentResponses(services.AttachmentService.ListByTopicId(topicId), nil)
 
 	ginx.WriteJSON(ctx, map[string]any{
-		"id":          idcodec.Encode(topic.Id),
-		"type":        topic.Type,
-		"categoryId":  topic.CategoryId,
-		"title":       topic.Title,
-		"content":     topic.Content,
-		"contentType": topic.ContentType,
-		"hideContent": topic.HideContent,
-		"tags":        tagNames,
-		"attachments": attachments,
+		"id":            idcodec.Encode(topic.Id),
+		"type":          topic.Type,
+		"categoryId":    topic.CategoryId,
+		"title":         topic.Title,
+		"content":       topic.Content,
+		"contentType":   topic.ContentType,
+		"hideContent":   topic.HideContent,
+		"tags":          tagNames,
+		"attachments":   attachments,
+		"platformArea":  topic.PlatformArea,
+		"businessScene": topic.BusinessScene,
+		"issueSource":   topic.IssueSource,
+		"issuePriority": topic.IssuePriority,
+		"issueSeverity": topic.IssueSeverity,
+		"issueOwner":    topic.IssueOwner,
 	})
 
 }
@@ -361,11 +361,6 @@ func TopicTopics(ctx *gin.Context) {
 		sort       = strings.TrimSpace(params.FormValue(ctx, "sort"))
 		user       = common.GetCurrentUser(ctx)
 	)
-	if categoryId == constants.CategoryIdFollow && user == nil {
-		ginx.WriteJSON(ctx, errs.NotLogin())
-		return
-	}
-
 	var temp []models.Topic
 	if cursor <= 0 {
 		stickyTopics := services.TopicService.GetStickyTopics(categoryId, 3, qaStatus)
@@ -433,24 +428,6 @@ func TopicTagTopics(ctx *gin.Context) {
 	}
 	topics, cursor, hasMore := services.TopicService.GetTagTopics(tagId, cursor)
 	ginx.WriteJSON(ctx, ginx.CursorData(render.BuildSimpleTopics(ctx, topics), strconv.FormatInt(cursor, 10), hasMore))
-
-}
-
-func TopicFavorite(ctx *gin.Context) {
-	topicIdStr := ctx.Param("id")
-
-	topicId := idcodec.Decode(topicIdStr)
-	user := common.GetCurrentUser(ctx)
-	if user == nil {
-		ginx.WriteJSON(ctx, errs.NotLogin())
-		return
-	}
-	err := services.FavoriteService.AddTopicFavorite(user.Id, topicId)
-	if err != nil {
-		ginx.WriteJSON(ctx, err)
-		return
-	}
-	ginx.WriteJSON(ctx, nil)
 
 }
 

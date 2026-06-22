@@ -18,7 +18,6 @@ func getEngine() *lute.Lute {
 		engine = lute.New(func(lute *lute.Lute) {
 			// lute.SetToC(true)
 			lute.SetSanitize(true)
-			lute.SetGFMTaskListItem(true)
 		})
 	})
 	return engine

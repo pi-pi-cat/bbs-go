@@ -109,8 +109,6 @@ type SearchReindexStatus = {
   topicTotal?: number
   articleProcessed?: number
   articleTotal?: number
-  userProcessed?: number
-  userTotal?: number
   startedAt: number
   finishedAt: number
   error: string
@@ -134,12 +132,9 @@ const NOTIFICATION_TYPE_KEYS = [
   "topicComment",
   "commentReply",
   "topicLike",
-  "topicFavorite",
   "topicRecommend",
   "topicDelete",
   "articleComment",
-  "userLevelUp",
-  "userBadgeGrant",
   "qaAnswerAccepted",
 ] as const
 const DEFAULT_ATTACHMENT_TYPES = [
@@ -588,10 +583,6 @@ export default function DashboardSettingsRoute() {
                   defaultCategoryId: settings.defaultCategoryId,
                   urlRedirect: settings.urlRedirect,
                   enableHideContent: settings.enableHideContent,
-                  enableQaBounty: settings.enableQaBounty,
-                  qaBountyMin: settings.qaBountyMin,
-                  qaBountyMax: settings.qaBountyMax,
-                  qaBountyRequired: settings.qaBountyRequired,
                   modules: settings.modules,
                   attachmentConfig: settings.attachmentConfig,
                 })
@@ -824,8 +815,6 @@ function SearchIndexSettings({
   const topicTotal = status?.topicTotal ?? 0
   const articleProcessed = status?.articleProcessed ?? 0
   const articleTotal = status?.articleTotal ?? 0
-  const userProcessed = status?.userProcessed ?? 0
-  const userTotal = status?.userTotal ?? 0
   const progress =
     total > 0 ? Math.min(100, Math.round((processed / total) * 100)) : 0
   const badgeVariant: React.ComponentProps<typeof Badge>["variant"] =
@@ -870,7 +859,7 @@ function SearchIndexSettings({
                 </span>
               </div>
               <Progress value={progress} />
-              <div className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-3">
+              <div className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
                 <span>
                   {s("search.topicProgress", {
                     processed: topicProcessed,
@@ -881,12 +870,6 @@ function SearchIndexSettings({
                   {s("search.articleProgress", {
                     processed: articleProcessed,
                     total: articleTotal,
-                  })}
-                </span>
-                <span>
-                  {s("search.userProgress", {
-                    processed: userProcessed,
-                    total: userTotal,
                   })}
                 </span>
               </div>
@@ -1031,19 +1014,11 @@ function ContentSettings({
   const attachmentAllowedTypes = Array.isArray(attachment.allowedTypes)
     ? getStringArray(attachment.allowedTypes)
     : DEFAULT_ATTACHMENT_TYPES
-  const qaBountyMin = getNumber(settings.qaBountyMin)
-  const qaBountyMax = getNumber(settings.qaBountyMax)
   const [validationError, setValidationError] = React.useState<string | null>(
     null
   )
 
   function submit() {
-    if (qaBountyMin > 0 && qaBountyMax > 0 && qaBountyMin > qaBountyMax) {
-      const message = s("content.message.qaBountyRangeInvalid")
-      setValidationError(message)
-      onError(message)
-      return
-    }
     setValidationError(null)
     onSave()
   }
@@ -1100,38 +1075,6 @@ function ContentSettings({
           checked={Boolean(settings.enableHideContent)}
           tooltip={s("content.enableHideContentTooltip")}
           onChange={(checked) => update("enableHideContent", checked)}
-        />
-      </Field>
-
-      <SectionTitle>{s("content.sectionQaBounty")}</SectionTitle>
-      <Field label={s("content.enableQaBounty")}>
-        <SwitchWithTooltip
-          checked={settings.enableQaBounty !== false}
-          tooltip={s("content.enableQaBountyTooltip")}
-          onChange={(checked) => update("enableQaBounty", checked)}
-        />
-      </Field>
-      <Field label={s("content.qaBountyMin")}>
-        <TooltipNumberInput
-          value={qaBountyMin}
-          min={0}
-          tooltip={s("content.qaBountyMinTooltip")}
-          onChange={(value) => update("qaBountyMin", value)}
-        />
-      </Field>
-      <Field label={s("content.qaBountyMax")}>
-        <TooltipNumberInput
-          value={qaBountyMax}
-          min={0}
-          tooltip={s("content.qaBountyMaxTooltip")}
-          onChange={(value) => update("qaBountyMax", value)}
-        />
-      </Field>
-      <Field label={s("content.qaBountyRequired")}>
-        <SwitchWithTooltip
-          checked={Boolean(settings.qaBountyRequired)}
-          tooltip={s("content.qaBountyRequiredTooltip")}
-          onChange={(checked) => update("qaBountyRequired", checked)}
         />
       </Field>
 

@@ -7,6 +7,7 @@ import { Trash2 } from "lucide-react"
 import { TagInput } from "@/components/common/tag-input"
 import { ContentEditor } from "@/components/editor/content-editor"
 import { CategoryQuickSelector } from "@/components/topic/category-selector"
+import { IssueFields } from "@/components/topic/issue-fields"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { apiFetch } from "@/lib/api/client"
@@ -33,6 +34,12 @@ type TopicEditFormState = {
   contentType: "html" | "markdown"
   hideContent: string
   tags: string[]
+  platformArea: string
+  businessScene: string
+  issueSource: string
+  issuePriority: string
+  issueSeverity: string
+  issueOwner: string
 }
 
 function categoryTypeMatches(topicType: number) {
@@ -50,6 +57,12 @@ function normalizeEditData(topic: TopicEditData): TopicEditFormState {
     contentType: topic.contentType === "markdown" ? "markdown" : "html",
     hideContent: topic.hideContent || "",
     tags: Array.isArray(topic.tags) ? topic.tags : [],
+    platformArea: topic.platformArea || "",
+    businessScene: topic.businessScene || "",
+    issueSource: topic.issueSource || "",
+    issuePriority: topic.issuePriority || "",
+    issueSeverity: topic.issueSeverity || "",
+    issueOwner: topic.issueOwner || "",
   }
 }
 
@@ -80,7 +93,6 @@ function TopicAttachmentField({
     try {
       const body = new FormData()
       body.append("file", file, file.name)
-      body.append("downloadScore", "0")
       const attachment = await apiFetch<TopicAttachment>(
         "/api/attachment/upload",
         {
@@ -93,25 +105,6 @@ function TopicAttachmentField({
       catchError(error)
     } finally {
       onUploadingChange(false)
-    }
-  }
-
-  async function updateScore(
-    attachment: TopicAttachment,
-    downloadScore: number
-  ) {
-    onChange(
-      value.map((item) =>
-        item.id === attachment.id ? { ...item, downloadScore } : item
-      )
-    )
-    try {
-      await apiFetch<null>("/api/attachment/update_download_score", {
-        method: "POST",
-        body: { id: attachment.id, downloadScore },
-      })
-    } catch (error) {
-      catchError(error)
     }
   }
 
@@ -168,22 +161,6 @@ function TopicAttachmentField({
                   {attachment.fileSize || 0} B
                 </span>
               </div>
-              <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                {t("pages.topic.create.attachment.scorePlaceholder")}
-                <Input
-                  type="number"
-                  min="0"
-                  step="1"
-                  className="h-8 w-20"
-                  value={attachment.downloadScore ?? 0}
-                  onChange={(event) =>
-                    void updateScore(
-                      attachment,
-                      Math.max(0, Number(event.currentTarget.value) || 0)
-                    )
-                  }
-                />
-              </label>
               <Button
                 type="button"
                 variant="ghost"
@@ -259,6 +236,12 @@ export function TopicEditForm({
           content: form.content,
           hideContent: form.hideContent,
           tags: form.tags,
+          platformArea: form.platformArea,
+          businessScene: form.businessScene,
+          issueSource: form.issueSource,
+          issuePriority: form.issuePriority,
+          issueSeverity: form.issueSeverity,
+          issueOwner: form.issueOwner,
           attachmentIds:
             form.type === 0 ? attachmentList.map((item) => item.id) : [],
         },
@@ -288,6 +271,20 @@ export function TopicEditForm({
           onChange={(categoryId) => updateForm({ categoryId })}
         />
       </div>
+
+      {form.type === 2 ? (
+        <IssueFields
+          value={{
+            platformArea: form.platformArea,
+            businessScene: form.businessScene,
+            issueSource: form.issueSource,
+            issuePriority: form.issuePriority,
+            issueSeverity: form.issueSeverity,
+            issueOwner: form.issueOwner,
+          }}
+          onChange={updateForm}
+        />
+      ) : null}
 
       <div className="field">
         <Input

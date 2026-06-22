@@ -175,22 +175,6 @@ func (s *sysConfigService) IsEnableHideContent() bool {
 	return cache.SysConfigCache.GetBool(constants.SysConfigEnableHideContent)
 }
 
-func (s *sysConfigService) IsEnableQaBounty() bool {
-	return cache.SysConfigCache.GetBool(constants.SysConfigEnableQaBounty)
-}
-
-func (s *sysConfigService) GetQaBountyMin() int {
-	return cache.SysConfigCache.GetInt(constants.SysConfigQaBountyMin)
-}
-
-func (s *sysConfigService) GetQaBountyMax() int {
-	return cache.SysConfigCache.GetInt(constants.SysConfigQaBountyMax)
-}
-
-func (s *sysConfigService) IsQaBountyRequired() bool {
-	return cache.SysConfigCache.GetBool(constants.SysConfigQaBountyRequired)
-}
-
 func (s *sysConfigService) IsArticlePending() bool {
 	return cache.SysConfigCache.GetBool(constants.SysConfigArticlePending)
 }
@@ -300,8 +284,7 @@ func (s *sysConfigService) GetNotificationTypes() map[string]dto.NoticeTypeConfi
 		_ = jsons.Parse(str, &out)
 	}
 	// 默认补全缺失类型：topicDelete 默认不发邮件（保持历史行为），其余全部开启
-	allKeys := []string{"topicComment", "commentReply", "topicLike", "topicFavorite", "topicRecommend", "topicDelete", "articleComment", "userLevelUp", "userBadgeGrant", "qaAnswerAccepted"}
-	for _, k := range allKeys {
+	for _, k := range defaultNotificationTypeKeys() {
 		if _, ok := out[k]; !ok {
 			if k == "topicDelete" {
 				out[k] = dto.NoticeTypeConfig{Site: true, Email: false}
@@ -313,6 +296,18 @@ func (s *sysConfigService) GetNotificationTypes() map[string]dto.NoticeTypeConfi
 	return out
 }
 
+func defaultNotificationTypeKeys() []string {
+	return []string{
+		"topicComment",
+		"commentReply",
+		"topicLike",
+		"topicRecommend",
+		"topicDelete",
+		"articleComment",
+		"qaAnswerAccepted",
+	}
+}
+
 // msgTypeToKey msg.Type 与 notificationTypes 的 key 对应
 func msgTypeToKey(t msg.Type) string {
 	switch t {
@@ -322,18 +317,12 @@ func msgTypeToKey(t msg.Type) string {
 		return "commentReply"
 	case msg.TypeTopicLike:
 		return "topicLike"
-	case msg.TypeTopicFavorite:
-		return "topicFavorite"
 	case msg.TypeTopicRecommend:
 		return "topicRecommend"
 	case msg.TypeTopicDelete:
 		return "topicDelete"
 	case msg.TypeArticleComment:
 		return "articleComment"
-	case msg.TypeUserLevelUp:
-		return "userLevelUp"
-	case msg.TypeUserBadgeGrant:
-		return "userBadgeGrant"
 	case msg.TypeQaAnswerAccepted:
 		return "qaAnswerAccepted"
 	default:
@@ -345,7 +334,7 @@ func msgTypeToKey(t msg.Type) string {
 func (s *sysConfigService) IsSiteNoticeEnabled(msgType msg.Type) bool {
 	key := msgTypeToKey(msgType)
 	if key == "" {
-		return true
+		return false
 	}
 	types := s.GetNotificationTypes()
 	c, ok := types[key]
@@ -359,7 +348,7 @@ func (s *sysConfigService) IsSiteNoticeEnabled(msgType msg.Type) bool {
 func (s *sysConfigService) IsEmailNoticeEnabled(msgType msg.Type) bool {
 	key := msgTypeToKey(msgType)
 	if key == "" {
-		return true
+		return false
 	}
 	types := s.GetNotificationTypes()
 	c, ok := types[key]

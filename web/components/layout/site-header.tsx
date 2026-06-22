@@ -8,18 +8,12 @@ import {
   useSearchParams,
 } from "@/lib/router/navigation"
 import {
-  Bell,
-  BellRing,
   ChevronDown,
   CircleHelp,
   FileText,
-  Heart,
   LayoutDashboard,
-  ListChecks,
   LogOut,
   Menu,
-  MessageCircle,
-  MessageSquare,
   Plus,
   Settings,
   User,
@@ -30,7 +24,6 @@ import {
   useAppConfig,
   useAppState,
   useCurrentUser,
-  useUnreadMessageCount,
 } from "@/components/app/app-provider"
 import { UserAvatar } from "@/components/common/avatar"
 import {
@@ -97,22 +90,6 @@ function moduleItems(config: SiteConfig | null, t: TFunction) {
     icon: React.ComponentType<{ className?: string }>
   }> = []
 
-  if (enabledModules?.tweet) {
-    items.push({
-      command: "tweet",
-      name: t("common.createBtn.tweet"),
-      href: "/topic/create?type=1",
-      icon: MessageCircle,
-    })
-  }
-  if (enabledModules?.topic) {
-    items.push({
-      command: "topic",
-      name: t("common.createBtn.topic"),
-      href: "/topic/create",
-      icon: MessageSquare,
-    })
-  }
   if (enabledModules?.qa) {
     items.push({
       command: "qa",
@@ -167,21 +144,6 @@ function CreateTopicButton({
         })}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-function MsgNotice({ count }: { count: number }) {
-  return (
-    <Link
-      href="/user/messages"
-      className="inline-flex h-8 w-8 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
-    >
-      {count > 0 ? (
-        <BellRing size={18} className="animate-swing" />
-      ) : (
-        <Bell size={18} />
-      )}
-    </Link>
   )
 }
 
@@ -296,21 +258,6 @@ function UserMenu({
             >
               <User className="mr-2 h-4 w-4" />
               {t("common.header.profile")}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/tasks" className="flex cursor-pointer items-center">
-              <ListChecks className="mr-2 h-4 w-4" />
-              {t("common.header.tasks")}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
-              href="/user/favorites"
-              className="flex cursor-pointer items-center"
-            >
-              <Heart className="mr-2 h-4 w-4" />
-              {t("common.header.favorites")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
@@ -515,24 +462,6 @@ function MobileMenu({
               </SheetClose>
               <SheetClose asChild onClick={closeMobileMenu}>
                 <Link
-                  href="/user/favorites"
-                  className="flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  <Heart className="mr-3 h-4 w-4" />
-                  {t("common.header.favorites")}
-                </Link>
-              </SheetClose>
-              <SheetClose asChild onClick={closeMobileMenu}>
-                <Link
-                  href="/tasks"
-                  className="flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  <ListChecks className="mr-3 h-4 w-4" />
-                  {t("common.header.tasks")}
-                </Link>
-              </SheetClose>
-              <SheetClose asChild onClick={closeMobileMenu}>
-                <Link
                   href="/user/profile"
                   className="flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
@@ -587,7 +516,6 @@ export function SiteHeader() {
   const config = useAppConfig()
   const user = useCurrentUser()
   const { setCurrentUser } = useAppState()
-  const unreadMessageCount = useUnreadMessageCount()
   const { t } = useI18n()
   const fullPath = useCurrentFullPath()
   const navs = config?.siteNavs ?? []
@@ -617,7 +545,6 @@ export function SiteHeader() {
               placeholder={t("component.searchInput.placeholder")}
             />
             <CreateTopicButton config={config} t={t} />
-            {user ? <MsgNotice count={unreadMessageCount} /> : null}
             {user ? (
               <UserMenu
                 user={user}

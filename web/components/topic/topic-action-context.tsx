@@ -12,11 +12,9 @@ type ActionSource = "side" | "detail"
 type TopicActionContextValue = {
   topicId: EntityId
   liked: boolean
-  favorited: boolean
   likeCount: number
   commentCount: number
   toggleLike: (source: ActionSource) => Promise<void>
-  toggleFavorite: (source: ActionSource) => Promise<void>
   scrollToComment: () => void
   scrollToTop: () => void
 }
@@ -28,14 +26,12 @@ const TopicActionContext = React.createContext<TopicActionContextValue | null>(
 export function TopicActionProvider({
   topicId,
   liked: initialLiked,
-  favorited: initialFavorited,
   likeCount: initialLikeCount,
   commentCount,
   children,
 }: {
   topicId: EntityId
   liked?: boolean
-  favorited?: boolean
   likeCount?: number
   commentCount?: number
   children: React.ReactNode
@@ -43,10 +39,8 @@ export function TopicActionProvider({
   const { t } = useI18n()
   const { catchError } = useToastActions()
   const [liked, setLiked] = React.useState(Boolean(initialLiked))
-  const [favorited, setFavorited] = React.useState(Boolean(initialFavorited))
   const [likeCount, setLikeCount] = React.useState(initialLikeCount || 0)
   const [likePending, setLikePending] = React.useState(false)
-  const [favoritePending, setFavoritePending] = React.useState(false)
 
   const toggleLike = React.useCallback(
     async (source: ActionSource) => {
@@ -87,52 +81,13 @@ export function TopicActionProvider({
     [catchError, likeCount, likePending, liked, t, topicId]
   )
 
-  const toggleFavorite = React.useCallback(
-    async (source: ActionSource) => {
-      if (favoritePending) return
-      const nextFavorited = !favorited
-      const previousFavorited = favorited
-      setFavoritePending(true)
-      setFavorited(nextFavorited)
-
-      try {
-        await apiFetch(
-          nextFavorited ? "/api/favorite/add" : "/api/favorite/delete",
-          {
-            method: "POST",
-            body: toFormData({ entityType: "topic", entityId: topicId }),
-          }
-        )
-        if (source === "side") {
-          toast.success(
-            t(
-              nextFavorited
-                ? "component.sideActionBar.favoriteSuccess"
-                : "component.sideActionBar.favoriteCancel"
-            )
-          )
-        } else {
-          toast.success(t("pages.topic.detail.favoriteSuccess"))
-        }
-      } catch (error) {
-        setFavorited(previousFavorited)
-        catchError(error)
-      } finally {
-        setFavoritePending(false)
-      }
-    },
-    [catchError, favoritePending, favorited, t, topicId]
-  )
-
   const value = React.useMemo<TopicActionContextValue>(
     () => ({
       topicId,
       liked,
-      favorited,
       likeCount,
       commentCount: commentCount || 0,
       toggleLike,
-      toggleFavorite,
       scrollToComment: () => {
         const element = document.getElementById("JComment")
         if (element) {
@@ -143,10 +98,8 @@ export function TopicActionProvider({
     }),
     [
       commentCount,
-      favorited,
       likeCount,
       liked,
-      toggleFavorite,
       toggleLike,
       topicId,
     ]

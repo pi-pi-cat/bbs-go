@@ -72,6 +72,34 @@ func TopicList(ctx *gin.Context) {
 			Op:        params.Eq,
 		},
 		params.QueryFilter{
+			ParamName: "issueStatus",
+			Op:        params.Eq,
+		},
+		params.QueryFilter{
+			ParamName: "platformArea",
+			Op:        params.Like,
+		},
+		params.QueryFilter{
+			ParamName: "businessScene",
+			Op:        params.Like,
+		},
+		params.QueryFilter{
+			ParamName: "issueSource",
+			Op:        params.Like,
+		},
+		params.QueryFilter{
+			ParamName: "issuePriority",
+			Op:        params.Eq,
+		},
+		params.QueryFilter{
+			ParamName: "issueSeverity",
+			Op:        params.Eq,
+		},
+		params.QueryFilter{
+			ParamName: "issueOwner",
+			Op:        params.Like,
+		},
+		params.QueryFilter{
 			ParamName: "recommend",
 			Op:        params.Eq,
 		},
@@ -241,6 +269,25 @@ func TopicMarkUnsolved(ctx *gin.Context) {
 		return
 	}
 	if err := services.TopicService.ForceSetQaStatus(id, constants.QaStatusUnsolved); err != nil {
+		ginx.WriteJSON(ctx, err)
+		return
+	}
+	ginx.WriteJSON(ctx, nil)
+
+}
+
+func TopicUpdateIssueStatus(ctx *gin.Context) {
+	id, _ := params.GetInt64(ctx, "id")
+	if id <= 0 {
+		ginx.WriteJSON(ctx, ginx.ErrorMessage("id is required"))
+		return
+	}
+	issueStatus := constants.IssueStatus(params.FormValue(ctx, "issueStatus"))
+	if !constants.IsValidIssueStatus(issueStatus) {
+		ginx.WriteJSON(ctx, ginx.ErrorMessage("issueStatus is invalid"))
+		return
+	}
+	if err := services.TopicService.UpdateIssueStatus(id, issueStatus); err != nil {
 		ginx.WriteJSON(ctx, err)
 		return
 	}

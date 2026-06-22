@@ -121,7 +121,7 @@ func TestPermissionService_SyncDefinitionsUpsertsPermissionsAndGrantsOwnerOnly(t
 	setupPermissionServiceTestDB(t)
 	owner := mustCreateRole(t, constants.RoleOwner, constants.StatusOk)
 	custom := mustCreateRole(t, "custom-admin", constants.StatusOk)
-	outdated := mustCreatePermission(t, permissions.PermissionLinkDelete.Code, constants.StatusDeleted)
+	outdated := mustCreatePermission(t, permissions.PermissionSitemapGenerate.Code, constants.StatusDeleted)
 	outdated.Name = "Old name"
 	outdated.GroupName = "old"
 	outdated.SortNo = 1
@@ -133,34 +133,34 @@ func TestPermissionService_SyncDefinitionsUpsertsPermissionsAndGrantsOwnerOnly(t
 		t.Fatalf("sync definitions: %v", err)
 	}
 
-	linkDelete := PermissionService.GetByCode(permissions.PermissionLinkDelete.Code)
-	if linkDelete == nil {
-		t.Fatalf("expected %s to exist", permissions.PermissionLinkDelete.Code)
+	sitemap := PermissionService.GetByCode(permissions.PermissionSitemapGenerate.Code)
+	if sitemap == nil {
+		t.Fatalf("expected %s to exist", permissions.PermissionSitemapGenerate.Code)
 	}
-	if linkDelete.Status != constants.StatusOk ||
-		linkDelete.GroupName != permissions.PermissionLinkDelete.GroupName ||
-		linkDelete.SortNo != permissions.PermissionLinkDelete.SortNo ||
-		linkDelete.Name != permissions.PermissionLinkDelete.NameEn {
-		t.Fatalf("permission was not synced from definition: %+v", linkDelete)
+	if sitemap.Status != constants.StatusOk ||
+		sitemap.GroupName != permissions.PermissionSitemapGenerate.GroupName ||
+		sitemap.SortNo != permissions.PermissionSitemapGenerate.SortNo ||
+		sitemap.Name != permissions.PermissionSitemapGenerate.NameEn {
+		t.Fatalf("permission was not synced from definition: %+v", sitemap)
 	}
-	if sitemap := PermissionService.GetByCode(permissions.PermissionSitemapGenerate.Code); sitemap == nil {
-		t.Fatalf("expected %s to be created", permissions.PermissionSitemapGenerate.Code)
+	if emailLog := PermissionService.GetByCode(permissions.PermissionEmailLogView.Code); emailLog == nil {
+		t.Fatalf("expected %s to be created", permissions.PermissionEmailLogView.Code)
 	}
 
 	ownerGrant := repositories.RolePermissionRepository.Take(
 		sqls.DB(),
 		"role_id = ? and permission_id = ?",
 		owner.Id,
-		linkDelete.Id,
+		sitemap.Id,
 	)
 	if ownerGrant == nil {
-		t.Fatalf("expected owner role to receive %s", permissions.PermissionLinkDelete.Code)
+		t.Fatalf("expected owner role to receive %s", permissions.PermissionSitemapGenerate.Code)
 	}
 	customGrant := repositories.RolePermissionRepository.Take(
 		sqls.DB(),
 		"role_id = ? and permission_id = ?",
 		custom.Id,
-		linkDelete.Id,
+		sitemap.Id,
 	)
 	if customGrant != nil {
 		t.Fatalf("expected custom role not to receive new permission automatically")

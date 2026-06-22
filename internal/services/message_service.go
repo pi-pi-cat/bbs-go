@@ -184,23 +184,13 @@ func (s *messageService) buildEmailNoticeFallbackTitle(t *models.Message) string
 		return locales.Get("email.comment_reply")
 	case msg.TypeTopicLike:
 		return locales.Get("email.topic_like")
-	case msg.TypeTopicFavorite:
-		return locales.Get("email.topic_favorite")
 	case msg.TypeTopicRecommend:
 		return locales.Get("email.topic_recommend")
 	case msg.TypeTopicDelete:
 		return locales.Get("email.topic_delete")
 	case msg.TypeArticleComment:
 		return locales.Get("email.article_comment")
-	case msg.TypeUserLevelUp:
-		return locales.Get("email.user_level_up")
-	case msg.TypeUserBadgeGrant:
-		return locales.Get("email.user_badge_grant")
 	case msg.TypeQaAnswerAccepted:
-		bountyScore := gjson.Get(t.ExtraData, "bountyScore").Int()
-		if bountyScore > 0 {
-			return locales.Getf("email.qa_answer_accepted_with_bounty", int(bountyScore))
-		}
 		return locales.Get("email.qa_answer_accepted")
 	}
 	return locales.Get("email.new_message")
@@ -245,15 +235,11 @@ func (s *messageService) buildEmailNoticeDetailURL(t *models.Message) string {
 		} else if entityType.String() == constants.EntityTopic {
 			return bbsurls.TopicUrl(entityId.Int())
 		}
-	case msg.TypeTopicLike, msg.TypeTopicFavorite, msg.TypeTopicRecommend, msg.TypeQaAnswerAccepted:
+	case msg.TypeTopicLike, msg.TypeTopicRecommend, msg.TypeQaAnswerAccepted:
 		topicId := gjson.Get(t.ExtraData, "topicId")
 		if topicId.Exists() && topicId.Int() > 0 {
 			return bbsurls.TopicUrl(topicId.Int())
 		}
-	case msg.TypeUserLevelUp:
-		return bbsurls.AbsUrl("/tasks")
-	case msg.TypeUserBadgeGrant:
-		return bbsurls.UserUrl(t.UserId) + "/badges"
 	}
-	return bbsurls.AbsUrl("/user/messages")
+	return bbsurls.AbsUrl("/user/profile")
 }

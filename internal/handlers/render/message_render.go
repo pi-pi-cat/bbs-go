@@ -70,7 +70,7 @@ func getMessageDetailUrl(t *models.Message) string {
 		} else if entityType.String() == constants.EntityTopic {
 			return bbsurls.TopicUrl(entityId.Int())
 		}
-	case msg.TypeTopicLike, msg.TypeTopicFavorite, msg.TypeTopicRecommend:
+	case msg.TypeTopicLike, msg.TypeTopicRecommend:
 		topicId := gjson.Get(t.ExtraData, "topicId")
 		if topicId.Exists() && topicId.Int() > 0 {
 			return bbsurls.TopicUrl(topicId.Int())
@@ -80,10 +80,6 @@ func getMessageDetailUrl(t *models.Message) string {
 		if topicId.Exists() && topicId.Int() > 0 {
 			return bbsurls.TopicUrl(topicId.Int())
 		}
-	case msg.TypeUserLevelUp:
-		return bbsurls.AbsUrl("/tasks")
-	case msg.TypeUserBadgeGrant:
-		return bbsurls.UserUrl(t.UserId) + "/badges"
 	}
-	return bbsurls.AbsUrl("/user/messages")
+	return bbsurls.AbsUrl("/user/profile")
 }
