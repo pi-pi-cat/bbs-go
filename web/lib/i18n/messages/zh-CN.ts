@@ -13,10 +13,10 @@ const zhCN = {
     },
     createBtn: {
       create: "发表",
-      topic: "话题",
+      topic: "问答",
       qa: "问答",
       tweet: "动态",
-      article: "文章",
+      article: "知识库",
     },
     header: {
       profile: "个人中心",
@@ -26,9 +26,6 @@ const zhCN = {
       login: "登录",
       confirmLogout: "确定退出登录吗？",
       toggleMenu: "展开菜单",
-    },
-    footer: {
-      poweredBy: "Powered by",
     },
     theme: {
       toggle: "切换主题",
@@ -149,8 +146,8 @@ const zhCN = {
       no: "否",
     },
     reportDataTypes: {
-      topic: "帖子",
-      article: "文章",
+      topic: "问答",
+      article: "知识库",
       comment: "评论",
       user: "用户",
     },
@@ -179,8 +176,8 @@ const zhCN = {
       female: "女",
     },
     topicFeed: {
-      untitled: "未命名话题",
-      typeTopic: "话题",
+      untitled: "未命名问答",
+      typeTopic: "问答",
       typeTweet: "动态",
       typeQa: "问答",
       statusNormal: "正常",
@@ -203,7 +200,7 @@ const zhCN = {
       daily: "每日",
     },
     categoryTypes: {
-      normal: "话题",
+      normal: "问答",
       qa: "问答",
     },
     forbiddenWordTypes: {
@@ -356,9 +353,9 @@ const zhCN = {
         sectionAttachment: "帖子附件",
         modules: "功能模块",
         tweet: "动态",
-        topic: "帖子",
+        topic: "问答",
         qa: "提问",
-        article: "文章",
+        article: "知识库",
         defaultCategoryId: "默认分类",
         recommendTags: "推荐标签",
         urlRedirect: "站外链接跳转页面",
@@ -831,13 +828,13 @@ const zhCN = {
     },
     userInfo: {
       level: "等级",
-      topicCount: "话题",
+      topicCount: "问答",
       commentCount: "评论",
     },
     myCounts: {
       title: "个人成就",
       level: "等级",
-      topicCount: "话题",
+      topicCount: "问答",
       commentCount: "评论",
     },
     myProfile: {
@@ -1121,11 +1118,12 @@ const zhCN = {
     },
     nav: {
       home: "首页",
-      topics: "帖子",
+      topics: "问答",
+      articles: "知识库",
       search: "搜索",
     },
     topics: {
-      title: "话题",
+      title: "问答",
       filterLatestPublish: "最新发布",
       filterLatestReply: "最新回复",
       subCategories: "子分类",
@@ -1263,7 +1261,7 @@ const zhCN = {
       filterSolved: "已解决",
     },
     articles: {
-      title: "文章",
+      title: "知识库",
     },
     article: {
       detail: {
@@ -1310,8 +1308,8 @@ const zhCN = {
       viewMore: "查看更多",
       tabs: {
         all: "全部",
-        topic: "帖子",
-        article: "文章",
+        topic: "问答",
+        article: "知识库",
       },
       node: "分类",
       allCategories: "全部分类",
@@ -1452,8 +1450,8 @@ const zhCN = {
     user: {
       profile: "个人主页",
       personalCenter: "个人中心",
-      topics: "话题",
-      articles: "文章",
+      topics: "问答",
+      articles: "知识库",
     },
   },
   user: {

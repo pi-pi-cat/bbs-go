@@ -11,6 +11,11 @@ func TestSeedForLanguageDoesNotExposeRemovedCommunityGrowthNavs(t *testing.T) {
 	original := config.Instance
 	t.Cleanup(func() { config.Instance = original })
 
+	expectedTitles := map[config.Language]map[string]string{
+		config.LanguageEnUS: {"/topics": "Q&A", "/articles": "Knowledge Base"},
+		config.LanguageZhCN: {"/topics": "问答", "/articles": "知识库"},
+	}
+
 	for _, lang := range []config.Language{config.LanguageEnUS, config.LanguageZhCN} {
 		config.Instance = &config.Config{Language: lang}
 		seed := seedForLanguage()
@@ -20,6 +25,9 @@ func TestSeedForLanguageDoesNotExposeRemovedCommunityGrowthNavs(t *testing.T) {
 			if nav["url"] == "/tasks" {
 				t.Fatalf("default %s nav should not expose removed tasks page: %#v", lang, navs)
 			}
+			if expected, ok := expectedTitles[lang][nav["url"]]; ok && nav["title"] != expected {
+				t.Fatalf("default %s nav %s should be titled %q, got %#v", lang, nav["url"], expected, navs)
+			}
 		}
 	}
 }
@@ -27,8 +35,8 @@ func TestSeedForLanguageDoesNotExposeRemovedCommunityGrowthNavs(t *testing.T) {
 func TestDefaultFooterLinksDoesNotExposeRemovedLinksPage(t *testing.T) {
 	links := defaultFooterLinks()
 	for _, link := range links {
-		if link.Url == "/links" {
-			t.Fatalf("default footer links should not expose removed links page: %#v", links)
+		if link.Url == "/about" || link.Url == "/links" {
+			t.Fatalf("default footer links should not expose removed page %s: %#v", link.Url, links)
 		}
 	}
 }

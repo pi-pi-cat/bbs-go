@@ -29,6 +29,7 @@ import {
   getScriptInjectionElementId,
 } from "@/lib/script-injections"
 import { siteMeta } from "@/lib/seo"
+import { normalizeSiteConfig } from "@/lib/site-config"
 
 import type { Route } from "./+types/root"
 import { rootDataContext } from "./route-helpers/context"
@@ -60,7 +61,7 @@ async function loadRootData(request: Request): Promise<RootLoaderData> {
   ])
 
   return {
-    config,
+    config: normalizeSiteConfig(config),
     currentUser,
     locale: normalizeLocale(config?.language),
     unreadMessageCount: 0,

@@ -32,7 +32,7 @@ export function meta({
   return tagPageMeta(
     rootData?.config,
     data?.tag,
-    localizedTitle(rootData?.locale, "Articles", "文章"),
+    localizedTitle(rootData?.locale, "Knowledge Base", "知识库"),
     location.pathname
   )
 }

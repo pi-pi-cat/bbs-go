@@ -32,7 +32,7 @@ export function meta({
   return userMeta(
     rootData?.config,
     data?.user,
-    localizedTitle(rootData?.locale, "Articles", "文章"),
+    localizedTitle(rootData?.locale, "Knowledge Base", "知识库"),
     location.pathname
   )
 }

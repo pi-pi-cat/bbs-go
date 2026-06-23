@@ -5,6 +5,7 @@ import type { SiteConfig, UserSummary } from "@/lib/api/types"
 import { getSessionUser } from "@/lib/auth/session"
 import { createT, type Locale, type TFunction } from "@/lib/i18n"
 import { getServerLocale } from "@/lib/i18n/server"
+import { normalizeSiteConfig } from "@/lib/site-config"
 
 export type AppState = {
   config: SiteConfig | null
@@ -23,7 +24,7 @@ export const getAppState = cache(async (): Promise<AppState> => {
   const locale = await getServerLocale(config?.language)
 
   return {
-    config,
+    config: normalizeSiteConfig(config),
     currentUser,
     locale,
     unreadMessageCount: 0,

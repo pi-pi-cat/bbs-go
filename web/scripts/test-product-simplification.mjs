@@ -18,7 +18,6 @@ const siteHeader = source("components/layout/site-header.tsx")
 for (const forbidden of [
   "/user/messages",
   "/user/favorites",
-  "/tasks",
   "useUnreadMessageCount",
   "MsgNotice",
   "common.header.tasks",
@@ -28,6 +27,52 @@ for (const forbidden of [
     siteHeader.includes(forbidden),
     false,
     `site header should not expose community utility entry: ${forbidden}`
+  )
+}
+
+const siteConfigNormalizer = source("lib/site-config.ts")
+for (const expected of ["normalizeSiteConfig", "removedSiteNavUrls", "removedFooterLinkUrls"]) {
+  assert.equal(
+    siteConfigNormalizer.includes(expected),
+    true,
+    `site config should normalize removed legacy configuration: ${expected}`
+  )
+}
+
+for (const forbidden of ['href="/tasks"', 'href: "/tasks"', '"/tasks"']) {
+  assert.equal(
+    siteHeader.includes(forbidden),
+    false,
+    `site header should not render removed tasks navigation: ${forbidden}`
+  )
+}
+
+const siteFooter = source("components/layout/site-footer.tsx")
+for (const forbidden of ["Powered by", "BBS-GO", "https://bbs-go.com"]) {
+  assert.equal(
+    siteFooter.includes(forbidden),
+    false,
+    `site footer should not expose removed product attribution: ${forbidden}`
+  )
+}
+
+for (const expected of ['"/about"', '"/links"']) {
+  assert.equal(
+    siteConfigNormalizer.includes(expected),
+    true,
+    `site config should hide removed footer link from existing config: ${expected}`
+  )
+}
+
+for (const file of [
+  "app/root.tsx",
+  "lib/app-state/client.ts",
+  "lib/app-state/server.ts",
+]) {
+  assert.equal(
+    source(file).includes("normalizeSiteConfig"),
+    true,
+    `${file} should normalize legacy config before rendering`
   )
 }
 

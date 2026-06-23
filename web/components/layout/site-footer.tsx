@@ -4,7 +4,6 @@ import Link from "@/components/common/link"
 
 import { useAppConfig, useAppLocale } from "@/components/app/app-provider"
 import type { Locale } from "@/lib/i18n"
-import { useI18n } from "@/lib/i18n/provider"
 
 function localizedText(
   value: Record<string, string> | undefined,
@@ -24,10 +23,13 @@ function isInternalUrl(url: string | undefined) {
 export function SiteFooter() {
   const config = useAppConfig()
   const locale = useAppLocale()
-  const { t } = useI18n()
   const links =
     config?.footerLinks?.filter(
-      (item) => item.visible !== false && localizedText(item.text, locale)
+      (item) =>
+        item.visible !== false &&
+        item.url !== "/about" &&
+        item.url !== "/links" &&
+        localizedText(item.text, locale)
     ) ?? []
 
   return (
@@ -72,17 +74,6 @@ export function SiteFooter() {
               })}
             </div>
           ) : null}
-          <div className="footer-powered">
-            <span>{t("common.footer.poweredBy")}</span>
-            <a
-              href="https://bbs-go.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="light"
-            >
-              BBS-GO
-            </a>
-          </div>
         </footer>
       </div>
     </section>

@@ -13,10 +13,10 @@ const enUS = {
     },
     createBtn: {
       create: "Create",
-      topic: "Topic",
+      topic: "Q&A",
       qa: "Q&A",
       tweet: "Update",
-      article: "Article",
+      article: "Knowledge Base",
     },
     header: {
       profile: "Profile",
@@ -26,9 +26,6 @@ const enUS = {
       login: "Sign in",
       confirmLogout: "Are you sure you want to sign out?",
       toggleMenu: "Toggle menu",
-    },
-    footer: {
-      poweredBy: "Powered by",
     },
     theme: {
       toggle: "Switch theme",
@@ -149,8 +146,8 @@ const enUS = {
       no: "No",
     },
     reportDataTypes: {
-      topic: "Topic",
-      article: "Article",
+      topic: "Q&A",
+      article: "Knowledge Base",
       comment: "Comment",
       user: "User",
     },
@@ -179,8 +176,8 @@ const enUS = {
       female: "Female",
     },
     topicFeed: {
-      untitled: "Untitled topic",
-      typeTopic: "Topic",
+      untitled: "Untitled Q&A",
+      typeTopic: "Q&A",
       typeTweet: "Update",
       typeQa: "Q&A",
       statusNormal: "Normal",
@@ -203,7 +200,7 @@ const enUS = {
       daily: "Daily",
     },
     categoryTypes: {
-      normal: "Topic",
+      normal: "Q&A",
       qa: "Q&A",
     },
     forbiddenWordTypes: {
@@ -357,9 +354,9 @@ const enUS = {
         sectionAttachment: "Topic Attachments",
         modules: "Features",
         tweet: "Update",
-        topic: "Topic",
+        topic: "Q&A",
         qa: "Q&A",
-        article: "Article",
+        article: "Knowledge Base",
         defaultCategoryId: "Default Category",
         recommendTags: "Featured tags",
         urlRedirect: "External Link Redirect Page",
@@ -582,7 +579,7 @@ const enUS = {
         description:
           "Rebuild topic, article, and user indexes when search results are missing, stale, or after bulk content changes.",
         indexedContent: "Indexed Content",
-        indexedContentTopics: "Topics",
+        indexedContentTopics: "Q&A",
         indexedContentAll: "Topics, articles, users",
         status: "Status",
         statusIdle: "Not Started",
@@ -848,13 +845,13 @@ const enUS = {
     },
     userInfo: {
       level: "Level",
-      topicCount: "Topics",
+      topicCount: "Q&A",
       commentCount: "Comments",
     },
     myCounts: {
       title: "Information",
       level: "Level",
-      topicCount: "Topics",
+      topicCount: "Q&A",
       commentCount: "Comments",
     },
     myProfile: {
@@ -1142,11 +1139,12 @@ const enUS = {
     },
     nav: {
       home: "Home",
-      topics: "Topics",
+      topics: "Q&A",
+      articles: "Knowledge Base",
       search: "Search",
     },
     topics: {
-      title: "Topics",
+      title: "Q&A",
       filterLatestPublish: "Newest",
       filterLatestReply: "Recently active",
       subCategories: "Subcategories",
@@ -1288,7 +1286,7 @@ const enUS = {
       filterSolved: "Solved",
     },
     articles: {
-      title: "Articles",
+      title: "Knowledge Base",
     },
     article: {
       detail: {
@@ -1338,8 +1336,8 @@ const enUS = {
       viewMore: "View more",
       tabs: {
         all: "All",
-        topic: "Topics",
-        article: "Articles",
+        topic: "Q&A",
+        article: "Knowledge Base",
       },
       node: "Category",
       allCategories: "All categories",
@@ -1487,8 +1485,8 @@ const enUS = {
     user: {
       profile: "Profile",
       personalCenter: "Personal Center",
-      topics: "Topics",
-      articles: "Articles",
+      topics: "Q&A",
+      articles: "Knowledge Base",
     },
   },
   user: {

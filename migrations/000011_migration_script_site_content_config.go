@@ -73,15 +73,6 @@ func defaultFooterLinks() []dto.FooterLink {
 	return []dto.FooterLink{
 		{
 			Text: dto.LocalizedText{
-				"en-US": "About",
-				"zh-CN": "关于",
-			},
-			Url:             "/about",
-			OpenInNewWindow: false,
-			Visible:         true,
-		},
-		{
-			Text: dto.LocalizedText{
 				"en-US": "ICP Filing",
 				"zh-CN": "ICP备案号",
 			},

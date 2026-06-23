@@ -3,6 +3,7 @@ package services
 import (
 	"bbs-go/internal/models/constants"
 	"bbs-go/internal/models/dto"
+	"bbs-go/internal/pkg/config"
 	"bbs-go/internal/pkg/locales"
 	"bbs-go/internal/pkg/msg"
 	"errors"
@@ -32,6 +33,15 @@ const (
 	maxScriptInjectionCodeLen = 20 * 1024
 	maxScriptInjectionNameLen = 200
 )
+
+var removedSiteNavURLs = map[string]struct{}{
+	"/tasks": {},
+}
+
+var removedFooterLinkURLs = map[string]struct{}{
+	"/about": {},
+	"/links": {},
+}
 
 func newSysConfigService() *sysConfigService {
 	return &sysConfigService{}
@@ -195,7 +205,7 @@ func (s *sysConfigService) GetSiteNavs() []dto.ActionLink {
 			slog.Warn("站点导航数据错误", slog.Any("err", err))
 		}
 	}
-	return siteNavsArr
+	return normalizeSiteNavs(siteNavsArr)
 }
 
 func (s *sysConfigService) GetModules() dto.ModulesConfig {
@@ -258,7 +268,59 @@ func (s *sysConfigService) GetFooterLinks() []dto.FooterLink {
 		slog.Warn("底部链接配置错误", slog.Any("err", err))
 		return []dto.FooterLink{}
 	}
-	return cfg
+	return filterFooterLinks(cfg)
+}
+
+func normalizeSiteNavs(navs []dto.ActionLink) []dto.ActionLink {
+	lang := config.DefaultLanguage
+	if config.Instance != nil && config.Instance.Language.IsValid() {
+		lang = config.Instance.Language
+	}
+
+	ret := make([]dto.ActionLink, 0, len(navs))
+	for _, nav := range navs {
+		if _, ok := removedSiteNavURLs[nav.Url]; ok {
+			continue
+		}
+		if title, ok := normalizedSiteNavTitle(nav.Url, lang); ok {
+			nav.Title = title
+		}
+		if len(nav.Children) > 0 {
+			nav.Children = normalizeSiteNavs(nav.Children)
+		}
+		ret = append(ret, nav)
+	}
+	return ret
+}
+
+func normalizedSiteNavTitle(url string, lang config.Language) (string, bool) {
+	if lang == config.LanguageZhCN {
+		switch url {
+		case "/topics":
+			return "问答", true
+		case "/articles":
+			return "知识库", true
+		}
+	} else {
+		switch url {
+		case "/topics":
+			return "Q&A", true
+		case "/articles":
+			return "Knowledge Base", true
+		}
+	}
+	return "", false
+}
+
+func filterFooterLinks(links []dto.FooterLink) []dto.FooterLink {
+	ret := make([]dto.FooterLink, 0, len(links))
+	for _, link := range links {
+		if _, ok := removedFooterLinkURLs[link.Url]; ok {
+			continue
+		}
+		ret = append(ret, link)
+	}
+	return ret
 }
 
 // GetEmailWhitelist 邮箱白名单

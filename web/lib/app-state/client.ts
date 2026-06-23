@@ -2,6 +2,7 @@
 
 import { apiFetch } from "@/lib/api/client"
 import type { SiteConfig, UserSummary } from "@/lib/api/types"
+import { normalizeSiteConfig } from "@/lib/site-config"
 
 export type ClientAppStateHydration = {
   config?: SiteConfig | null
@@ -16,7 +17,7 @@ export async function loadClientAppState(): Promise<ClientAppStateHydration> {
   ])
 
   return {
-    config,
+    config: normalizeSiteConfig(config),
     currentUser,
     unreadMessageCount: 0,
   }
