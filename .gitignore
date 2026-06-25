@@ -26,6 +26,7 @@ bbs-go.test.yaml
 
 .idea/*
 build/*
+dist/*
 
 cscope.files
 tags
@@ -49,3 +50,4 @@ bbs-go.db*
 
 __debug_bin*
 .codex_docx_render
+docx/
